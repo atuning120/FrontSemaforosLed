@@ -10,7 +10,7 @@ export default function Footer() {
         <div className={styles.grid}>
           <div className={styles.brand}>
             <h4>
-              LED <span>CLEAN</span>
+              SEMAFOROS <span>LED</span>
             </h4>
             <p>
               Empresa especializada en la importación y distribución técnica de componentes
@@ -18,14 +18,13 @@ export default function Footer() {
             </p>
 
             <div className={styles.social}>
-              {/*<a href="#" title="Instagram">
+              <a href="https://www.instagram.com/semaforosled1978/" title="Instagram">
                 <FaInstagram className={styles.icon} />
-              </a>*/}
-              {/*<a href="#" title="YouTube">
+              </a>
+              <a href="https://www.youtube.com/watch?v=7YIYq1PwWBk" title="YouTube">
                 <FaYoutube className={styles.icon} />
               </a>
-              */}
-              <a href="https://www.facebook.com/share/1Cqo7RRLFV/" title="Facebook">
+              <a href="https://web.facebook.com/semaforosledargentina?_rdc=1&_rdr#" title="Facebook">
                 <FaFacebookF className={styles.icon} />
               </a>
             </div>
@@ -54,17 +53,6 @@ export default function Footer() {
                 </li>
               </ul>
               <ul>
-                <li className={styles.contactCard}>
-                  <div className={`${styles.iconContainer} ${styles.isGreen}`}>
-                    <MessageCircle className={styles.icon} />
-                  </div>
-                  <div>
-                    <span>WhatsApp Soporte</span>
-                    <strong>+{import.meta.env.VITE_WHATSAPP_PHONE}</strong>
-                  </div>
-                </li>
-              </ul>
-              <ul>
                 <li>
                   <ContactPopover
                     targetEmail={import.meta.env.VITE_CONSULTAS_EMAIL || 'consultas@ledclean.ar'}
@@ -82,13 +70,46 @@ export default function Footer() {
                   />
                 </li>
               </ul>
+              <ul>
+                <li className={styles.contactCard}>
+                  <div className={`${styles.iconContainer} ${styles.isGreen}`}>
+                    <MessageCircle className={styles.icon} />
+                  </div>
+                  <div>
+                    <span>WhatsApp Soporte</span>
+                    <strong>+{import.meta.env.VITE_WHATSAPP_PHONE}</strong>
+                  </div>
+                </li>
+              </ul>
+              <ul>
+                <li className={styles.contactCard}>
+                  <div className={`${styles.iconContainer} ${styles.isGreen}`}>
+                    <MessageCircle className={styles.icon} />
+                  </div>
+                  <div>
+                    <span>WhatsApp Comercial</span>
+                    <strong>+{import.meta.env.VITE_WHATSAPP_SECOND}</strong>
+                  </div>
+                </li>
+              </ul>
+              <ul>
+                <li className={styles.contactCard}>
+                  <div className={`${styles.iconContainer} ${styles.isAccent}`}>
+                    <MapPin className={styles.icon} />
+                  </div>
+                  <div>
+                    <span>Ubicacion</span>
+                    <strong>{import.meta.env.VITE_STORE_ADDRESS || 'Maipú 942 Este, San Juan, Argentina'}</strong>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
 
         <div className={styles.bottom}>
           <div className={styles.copyrightSection}>
-            <p>&copy; 2026 LED CLEAN. TRABAJAMOS CON LOS MEJORES.</p>
+            <p>&copy; 2026 Semaforos Led. TRABAJAMOS CON LOS MEJORES.</p>
             <div className={styles.developedBy}>
               Desarrollado por
               <a href="https://github.com/atuning120" target="_blank" rel="noopener noreferrer" className={styles.githubLink}>

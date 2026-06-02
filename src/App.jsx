@@ -14,7 +14,7 @@ import Toast from './components/Toast.jsx';
 import styles from './App.module.css';
 
 export default function App() {
-  const baseCategories = ['iluminacion', 'ferreteria', 'limpieza'];
+  const baseCategories = ['semáforos', 'luminarias', 'cartelería vial'];
   const normalizeCategory = (value) => (value || '').trim().toLowerCase();
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -105,7 +105,9 @@ export default function App() {
 
   const categories = useMemo(() => {
     const cats = new Set(products.map((p) => p.category));
-    cats.add('limpieza');
+    cats.add('semáforos');
+    cats.add('luminarias');
+    cats.add('cartelería vial');
     return ['Todos', ...Array.from(cats)];
   }, [products]);
 
@@ -200,7 +202,7 @@ export default function App() {
 
       <ProductCarousel
         title="Productos destacados"
-        subtitle="Calidad garantizada LED CLEAN"
+        subtitle="Calidad garantizada Semaforos Led"
         themeColor="var(--accent-500)"
         products={featuredProductsList}
         type="featured"

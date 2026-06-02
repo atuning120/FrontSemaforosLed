@@ -28,7 +28,7 @@ export default function Filters({
         <Search className={styles.searchIcon} />
         <input
           type="text"
-          placeholder="Buscar cables, reflectores..."
+          placeholder="Buscar semáforos, luminaria..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className={styles.searchInput}

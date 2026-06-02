@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Filters from '../Filters.jsx';
 import styles from './AdminProducts.module.css';
 
-const BASE_CATEGORIES = ['iluminacion', 'ferreteria', 'limpieza'];
+const BASE_CATEGORIES = ['semáforos', 'luminarias', 'cartelería vial'];
 
 const emptyForm = {
   sku: '',

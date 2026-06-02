@@ -6,14 +6,14 @@ export default function Navbar({ searchQuery, onSearchChange, onCartOpen, cartCo
   return (
     <nav className={styles.nav}>
       <div>
-        <Logo size={85} showText={true} />
+        <Logo size={100} showText={true} />
       </div>
 
       <div className={styles.navSearch}>
         <Search className={styles.navSearchIcon} size={20} />
         <input
           type="text"
-          placeholder="Buscar reflectores, focos, herramientas..."
+          placeholder="Buscar semáforos, luminaria, cartelería vial..."
           className={styles.navInput}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
