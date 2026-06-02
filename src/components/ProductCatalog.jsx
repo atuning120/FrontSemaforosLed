@@ -85,28 +85,15 @@ export default function ProductCatalog({
 
       {!loadingProducts && !productsError && (
         <div className={styles.grid}>
-            {paginatedProducts.map((product) => {
-              const hasOffer =
-                Number.isFinite(product.originalPrice) &&
-                product.originalPrice > product.price;
-              const discount = hasOffer
-                ? Math.round(
-                    ((product.originalPrice - product.price) /
-                      product.originalPrice) *
-                      100
-                  )
-                : null;
-
-              return (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  type="default"
-                  onProductClick={onProductClick}
-                  onAddToCart={onAddToCart}
-                />
-              );
-            })}
+            {paginatedProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                type="default"
+                onProductClick={onProductClick}
+                onAddToCart={onAddToCart}
+              />
+            ))}
         </div>
       )}
 

@@ -72,28 +72,37 @@ export default function AdminOrderForm({ baseUrl, token }) {
 
   const normalizedItems = items
     .map((item) => {
-      const product = productMap.get(item.sku);
       const quantity = Number(item.quantity) || 0;
       const price = Number(item.price);
+      const lineTotalValue = Number(item.lineTotal);
+      const hasManualLineTotal =
+        item.lineTotalManual && Number.isFinite(lineTotalValue);
       const resolvedPrice = Number.isFinite(price)
         ? price
-        : Number(product?.precio) || 0;
-      const lineTotalValue = Number(item.lineTotal);
-      const resolvedLineTotal =
-        item.lineTotalManual && Number.isFinite(lineTotalValue)
-          ? lineTotalValue
-          : resolvedPrice * quantity;
-      const adjustedPrice =
-        quantity > 0 ? resolvedLineTotal / quantity : resolvedPrice;
+        : hasManualLineTotal && quantity > 0
+          ? lineTotalValue / quantity
+          : NaN;
+      const resolvedLineTotal = hasManualLineTotal
+        ? lineTotalValue
+        : Number.isFinite(resolvedPrice)
+          ? resolvedPrice * quantity
+          : NaN;
 
       return {
         sku: item.sku,
         quantity,
-        name: item.name || product?.nombre || '',
-        price: adjustedPrice,
+        name: item.name || productMap.get(item.sku)?.nombre || '',
+        price: resolvedPrice,
+        lineTotal: resolvedLineTotal,
       };
     })
-    .filter((item) => item.sku);
+    .filter(
+      (item) =>
+        item.sku &&
+        item.quantity > 0 &&
+        Number.isFinite(item.price) &&
+        item.price >= 0
+    );
 
   const subtotal = normalizedItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -109,7 +118,7 @@ export default function AdminOrderForm({ baseUrl, token }) {
     totalOverride !== '' && Number.isFinite(parsedTotalOverride);
   const total = hasTotalOverride ? parsedTotalOverride : computedTotal;
 
-  const hasItems = normalizedItems.filter(item => item.quantity > 0).length > 0;
+  const hasItems = normalizedItems.length > 0;
   const isCustomerNameValid = customerName.trim().length > 0;
   const cleanedPhone = customerPhone.replace(/\D/g, '');
   const isCustomerPhoneValid = cleanedPhone.length >= 10 && cleanedPhone.length <= 13;
@@ -125,7 +134,7 @@ export default function AdminOrderForm({ baseUrl, token }) {
             ...item,
             sku: value,
             name: product?.nombre || '',
-            price: product?.precio ?? '',
+            price: '',
             lineTotal: '',
             lineTotalManual: false,
           };
@@ -133,10 +142,9 @@ export default function AdminOrderForm({ baseUrl, token }) {
         if (key === 'quantity') {
           const quantity = Number(value) || 0;
           const price = Number(item.price);
-          const resolvedPrice = Number.isFinite(price)
-            ? price
-            : Number(productMap.get(item.sku)?.precio) || 0;
-          const computedLineTotal = resolvedPrice * quantity;
+          const computedLineTotal = Number.isFinite(price)
+            ? price * quantity
+            : '';
 
           return {
             ...item,
@@ -265,7 +273,7 @@ export default function AdminOrderForm({ baseUrl, token }) {
         sku: item.sku,
         quantity: item.cantidad,
         name: item.nombre || '',
-        price: item.precio ?? 0,
+        price: '',
         lineTotal: '',
         lineTotalManual: false,
       }));
@@ -376,17 +384,15 @@ export default function AdminOrderForm({ baseUrl, token }) {
               {items.map((item, index) => (
                 <div key={`${item.sku}-${index}`} className={styles.orderRow}>
                   {(() => {
-                    const product = productMap.get(item.sku);
                     const quantity = Number(item.quantity) || 0;
                     const price = Number(item.price);
-                    const resolvedPrice = Number.isFinite(price)
-                      ? price
-                      : Number(product?.precio) || 0;
                     const lineTotalValue = Number(item.lineTotal);
                     const resolvedLineTotal =
                       item.lineTotalManual && Number.isFinite(lineTotalValue)
                         ? lineTotalValue
-                        : resolvedPrice * quantity;
+                        : Number.isFinite(price)
+                          ? price * quantity
+                          : '';
 
                     return (
                       <>
@@ -422,20 +428,17 @@ export default function AdminOrderForm({ baseUrl, token }) {
                           <input
                             type="text"
                             inputMode="decimal"
-                            value={formatNumber(resolvedPrice)}
-                            style={{
-                              opacity: 0.7,
-                              fontWeight: 'normal',
-                              background: 'transparent',
-                              border: 'none',
-                              outline: 'none',
-                              color: 'var(--text)',
-                              fontSize: '1rem',
-                              width: '80px',
-                              textAlign: 'center'
-                            }}
+                            value={formatNumber(item.price)}
+                            className={styles.input}
+                            style={{ width: '100px', textAlign: 'center' }}
                             placeholder="Precio unitario"
-                            disabled
+                            onChange={(event) =>
+                              handleItemChange(
+                                index,
+                                'price',
+                                parseNumberInput(event.target.value)
+                              )
+                            }
                           />
                         </div>
                         <div className={styles.priceInputWrap}>

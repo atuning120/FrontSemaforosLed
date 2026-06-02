@@ -10,13 +10,7 @@ const ProductCard = forwardRef(({
   onAddToCart,
   ...props
 }, ref) => {
-  const isOffer = type === 'offer' || (Number.isFinite(product.originalPrice) && product.originalPrice > product.price);
   const isFeatured = type === 'featured' || product.featured;
-  
-  let discount = null;
-  if (isOffer && product.originalPrice) {
-    discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
-  }
 
   let mediaClass = styles.media;
   if (product.tamano_imagen === 'square') mediaClass += ` ${styles.mediaSquare}`;
@@ -48,14 +42,9 @@ const ProductCard = forwardRef(({
         ) : (
           <div className={styles.noImage}>No hay imagen</div>
         )}
-        {(isOffer || isFeatured) && (
+        {isFeatured && (
           <div className={styles.badges}>
-            {isOffer && discount && (
-              <span className={styles.badgeOffer}>Oferta {discount}%</span>
-            )}
-            {isFeatured && (
-              <span className={styles.badgeFeatured}>Destacado</span>
-            )}
+            <span className={styles.badgeFeatured}>Destacado</span>
           </div>
         )}
       </div>
@@ -67,16 +56,6 @@ const ProductCard = forwardRef(({
         </div>
         <p>{product.description}</p>
         <div className={styles.actions}>
-          <div className={styles.priceStack}>
-            <span className={styles.price}>
-              ${product.price.toLocaleString('es-AR')}
-            </span>
-            {isOffer && product.originalPrice && (
-              <span className={styles.oldPrice}>
-                ${product.originalPrice.toLocaleString('es-AR')}
-              </span>
-            )}
-          </div>
           <button
             onClick={(event) => {
               event.stopPropagation();

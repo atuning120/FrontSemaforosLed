@@ -10,7 +10,6 @@ export default function Cart({
   setIsCartOpen,
   cart,
   cartCount,
-  cartTotal,
   removeFromCart,
   updateQuantity,
 }) {
@@ -38,22 +37,10 @@ export default function Cart({
     };
   }, [isCartOpen]);
 
-  const formatPrice = (value) => Number(value || 0).toLocaleString('es-AR');
-
   const buildMessage = () => {
-    const productLines = cart.map((item) => {
-      const percentage = Number(item.raw?.porcentaje_oferta || 0);
-      const hasDiscount = Boolean(item.raw?.en_oferta) && percentage > 0;
-      const currentPrice = formatPrice(item.price);
-      const previousPrice = hasDiscount
-        ? formatPrice(Math.round(item.price / (1 - percentage / 100)))
-        : null;
-      const priceLabel = hasDiscount
-        ? `$${currentPrice}, antes $${previousPrice}`
-        : `$${currentPrice}`;
-
-      return `- ${item.quantity}x ${item.name} (${priceLabel})`;
-    });
+    const productLines = cart.map(
+      (item) => `- ${item.quantity}x ${item.name}`
+    );
 
     const payload = btoa(
       unescape(encodeURIComponent(JSON.stringify(productPayload)))
@@ -63,7 +50,6 @@ export default function Cart({
       '*Nuevo Pedido desde la Web*',
       '*Productos*',
       ...productLines,
-      `*Total: $${formatPrice(cartTotal)}*`,
       '',
       `productos:${payload}`,
     ].join('\n');
@@ -136,9 +122,6 @@ export default function Cart({
                           <Trash2 className={styles.icon} />
                         </button>
                       </div>
-                      <div className={styles.price}>
-                        ${item.price.toLocaleString()}
-                      </div>
                       <div className={styles.qty}>
                         <button onClick={() => updateQuantity(item.id, -1)} aria-label="Restar">
                           <Minus className={styles.icon} />
@@ -157,10 +140,6 @@ export default function Cart({
             {cart.length > 0 && (
               <div className={styles.summary}>
                 {error ? <div className={styles.error}>{error}</div> : null}
-                <div className={styles.total}>
-                  <span>Monto Total</span>
-                  <strong>${cartTotal.toLocaleString()}</strong>
-                </div>
                 <div className={styles.checkout}>
                   <button onClick={handleWhatsAppOrder}>
                     <span>Enviar pedido</span>

@@ -9,12 +9,9 @@ const emptyForm = {
   sku: '',
   nombre: '',
   descripcion: '',
-  precio: '',
   categoria: BASE_CATEGORIES[0],
   moneda: 'ARS',
   imagen: '',
-  en_oferta: false,
-  porcentaje_oferta: 0,
   destacado: false,
   id_catalogo: '',
   tamano_imagen: 'default',
@@ -113,21 +110,16 @@ export default function AdminProducts({ baseUrl, token }) {
   }, [isCreateOpen, editingSku, deleteTarget]);
 
   const toPayload = (form) => {
-    const price = Number(form.precio);
-    const porcentaje = Number(form.porcentaje_oferta);
     const idCatalogo = form.id_catalogo === '' ? undefined : Number(form.id_catalogo);
 
     return {
       sku: form.sku.trim(),
       nombre: form.nombre.trim(),
       descripcion: form.descripcion.trim(),
-      precio: Number.isFinite(price) ? price : 0,
       categoria: form.categoria,
       moneda: form.moneda.trim() || 'ARS',
       imagen: form.imagen.trim(),
-      en_oferta: Boolean(form.en_oferta),
       destacado: Boolean(form.destacado),
-      porcentaje_oferta: form.en_oferta && Number.isFinite(porcentaje) ? porcentaje : 0,
       id_catalogo: idCatalogo,
       tamano_imagen: form.tamano_imagen || 'default',
     };
@@ -201,12 +193,9 @@ export default function AdminProducts({ baseUrl, token }) {
       sku: product.sku || '',
       nombre: product.nombre || '',
       descripcion: product.descripcion || '',
-      precio: product.precio ?? '',
       categoria: product.categoria || BASE_CATEGORIES[0],
       moneda: product.moneda || 'ARS',
       imagen: product.imagen || '',
-      en_oferta: Boolean(product.en_oferta),
-      porcentaje_oferta: product.porcentaje_oferta ?? 0,
       destacado: Boolean(product.destacado),
       id_catalogo: product.id_catalogo ?? '',
       tamano_imagen: product.tamano_imagen || 'default',
@@ -337,22 +326,6 @@ export default function AdminProducts({ baseUrl, token }) {
     }
   };
 
-  const editPercentage = Number(editForm.porcentaje_oferta || 0);
-  const editHasOffer = Boolean(editForm.en_oferta) && editPercentage > 0;
-  const editPrice = Number(editForm.precio);
-  const editOldPrice =
-    editHasOffer && Number.isFinite(editPrice) && editPrice > 0
-      ? Math.round(editPrice / (1 - editPercentage / 100))
-      : null;
-
-  const createPercentage = Number(createForm.porcentaje_oferta || 0);
-  const createHasOffer = Boolean(createForm.en_oferta) && createPercentage > 0;
-  const createPrice = Number(createForm.precio);
-  const createOldPrice =
-    createHasOffer && Number.isFinite(createPrice) && createPrice > 0
-      ? Math.round(createPrice / (1 - createPercentage / 100))
-      : null;
-
   const getMediaClass = (tamano) => {
     let cls = styles.productMedia;
     if (tamano === 'square') cls += ` ${styles.mediaSquare}`;
@@ -453,12 +426,6 @@ export default function AdminProducts({ baseUrl, token }) {
 
         <div className={styles.productsGrid}>
           {paginatedProducts.map((product) => {
-            const percentage = Number(product.porcentaje_oferta || 0);
-            const hasOffer = Boolean(product.en_oferta) && percentage > 0;
-            const oldPrice = hasOffer
-              ? Math.round(product.precio / (1 - percentage / 100))
-              : null;
-
             return (
               <div key={product.sku} className={styles.productCard}>
                 <div className={getMediaClass(product.tamano_imagen)}>
@@ -471,18 +438,13 @@ export default function AdminProducts({ baseUrl, token }) {
                   ) : (
                     <div className={styles.noImage}>No hay imagen</div>
                   )}
-                  <div className={styles.productBadges}>
-                    {hasOffer && (
-                      <span className={styles.badgeOffer}>
-                        Oferta {percentage}%
-                      </span>
-                    )}
-                    {product.destacado && (
+                  {product.destacado && (
+                    <div className={styles.productBadges}>
                       <span className={styles.badgeFeatured}>
                         Destacado
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   
                   <div className={styles.adminOverlay}>
                     <button onClick={() => startEdit(product)} className={styles.overlayBtn}>
@@ -504,16 +466,7 @@ export default function AdminProducts({ baseUrl, token }) {
                     {product.descripcion?.length > 80 ? '...' : ''}
                   </p>
                   
-                  <div className={styles.productActions}>
-                    <div className={styles.priceStack}>
-                      <span className={styles.productPrice}>${product.precio?.toLocaleString('es-AR')}</span>
-                      {hasOffer && oldPrice && (
-                        <span className={styles.oldPrice}>
-                          ${oldPrice.toLocaleString('es-AR')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  <div className={styles.productActions} />
                 </div>
               </div>
             );
@@ -599,18 +552,13 @@ export default function AdminProducts({ baseUrl, token }) {
                     ) : (
                       <div className={styles.noImage}>No hay imagen</div>
                     )}
-                    <div className={styles.productBadges}>
-                      {editHasOffer && (
-                        <span className={styles.badgeOffer}>
-                          Oferta {editPercentage}%
-                        </span>
-                      )}
-                      {editForm.destacado && (
+                    {editForm.destacado && (
+                      <div className={styles.productBadges}>
                         <span className={styles.badgeFeatured}>
                           Destacado
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className={styles.productContent}>
@@ -629,18 +577,7 @@ export default function AdminProducts({ baseUrl, token }) {
                       {editForm.descripcion?.length > 90 ? '...' : ''}
                     </p>
 
-                    <div className={styles.productActions}>
-                      <div className={styles.priceStack}>
-                        <span className={styles.productPrice}>
-                          ${Number(editForm.precio || 0).toLocaleString('es-AR')}
-                        </span>
-                        {editHasOffer && editOldPrice && (
-                          <span className={styles.oldPrice}>
-                            ${editOldPrice.toLocaleString('es-AR')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                    <div className={styles.productActions} />
                   </div>
                 </div>
               </div>
@@ -698,18 +635,6 @@ export default function AdminProducts({ baseUrl, token }) {
                   </label>
 
                   <label className={styles.label}>
-                    Precio
-                    <input
-                      type="number"
-                      value={editForm.precio}
-                      onChange={(event) =>
-                        setEditForm((prev) => ({ ...prev, precio: event.target.value }))
-                      }
-                      className={styles.input}
-                    />
-                  </label>
-                  
-                  <label className={styles.label}>
                     Moneda
                     <input
                       value={editForm.moneda}
@@ -736,50 +661,18 @@ export default function AdminProducts({ baseUrl, token }) {
                   </label>
 
                   <div className={styles.checkboxGroup}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <label className={styles.checkbox} style={{ margin: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={editForm.en_oferta}
-                          onChange={(event) =>
-                            setEditForm((prev) => ({
-                              ...prev,
-                              en_oferta: event.target.checked,
-                            }))
-                          }
-                        />
-                        En oferta
-                      </label>
-                      <label className={styles.checkbox} style={{ margin: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={editForm.destacado}
-                          onChange={(event) =>
-                            setEditForm((prev) => ({
-                              ...prev,
-                              destacado: event.target.checked,
-                            }))
-                          }
-                        />
-                        Destacado
-                      </label>
-                    </div>
-
-                    <label className={styles.label} style={{ marginLeft: 'auto', opacity: editForm.en_oferta ? 1 : 0.5 }}>
-                      Porcentaje oferta (%)
+                    <label className={styles.checkbox} style={{ margin: 0 }}>
                       <input
-                        type="number"
-                        value={editForm.porcentaje_oferta}
+                        type="checkbox"
+                        checked={editForm.destacado}
                         onChange={(event) =>
                           setEditForm((prev) => ({
                             ...prev,
-                            porcentaje_oferta: event.target.value,
+                            destacado: event.target.checked,
                           }))
                         }
-                        className={styles.input}
-                        disabled={!editForm.en_oferta}
-                        style={{ width: '140px' }}
                       />
+                      Destacado
                     </label>
                   </div>
 
@@ -888,18 +781,13 @@ export default function AdminProducts({ baseUrl, token }) {
                     ) : (
                       <div className={styles.noImage}>No hay imagen</div>
                     )}
-                    <div className={styles.productBadges}>
-                      {createHasOffer && (
-                        <span className={styles.badgeOffer}>
-                          Oferta {createPercentage}%
-                        </span>
-                      )}
-                      {createForm.destacado && (
+                    {createForm.destacado && (
+                      <div className={styles.productBadges}>
                         <span className={styles.badgeFeatured}>
                           Destacado
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className={styles.productContent}>
@@ -918,18 +806,7 @@ export default function AdminProducts({ baseUrl, token }) {
                       {createForm.descripcion?.length > 90 ? '...' : ''}
                     </p>
 
-                    <div className={styles.productActions}>
-                      <div className={styles.priceStack}>
-                        <span className={styles.productPrice}>
-                          ${Number(createForm.precio || 0).toLocaleString('es-AR')}
-                        </span>
-                        {createHasOffer && createOldPrice && (
-                          <span className={styles.oldPrice}>
-                            ${createOldPrice.toLocaleString('es-AR')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                    <div className={styles.productActions} />
                   </div>
                 </div>
               </div>
@@ -1002,18 +879,6 @@ export default function AdminProducts({ baseUrl, token }) {
                   </label>
 
                   <label className={styles.label}>
-                    Precio
-                    <input
-                      type="number"
-                      value={createForm.precio}
-                      onChange={(event) =>
-                        setCreateForm((prev) => ({ ...prev, precio: event.target.value }))
-                      }
-                      className={styles.input}
-                    />
-                  </label>
-
-                  <label className={styles.label}>
                     Moneda
                     <input
                       value={createForm.moneda}
@@ -1038,50 +903,18 @@ export default function AdminProducts({ baseUrl, token }) {
                   </label>
 
                   <div className={styles.checkboxGroup}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <label className={styles.checkbox} style={{ margin: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={createForm.en_oferta}
-                          onChange={(event) =>
-                            setCreateForm((prev) => ({
-                              ...prev,
-                              en_oferta: event.target.checked,
-                            }))
-                          }
-                        />
-                        En oferta
-                      </label>
-                      <label className={styles.checkbox} style={{ margin: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={createForm.destacado}
-                          onChange={(event) =>
-                            setCreateForm((prev) => ({
-                              ...prev,
-                              destacado: event.target.checked,
-                            }))
-                          }
-                        />
-                        Destacado
-                      </label>
-                    </div>
-
-                    <label className={styles.label} style={{ marginLeft: 'auto', opacity: createForm.en_oferta ? 1 : 0.5 }}>
-                      Porcentaje oferta (%)
+                    <label className={styles.checkbox} style={{ margin: 0 }}>
                       <input
-                        type="number"
-                        value={createForm.porcentaje_oferta}
+                        type="checkbox"
+                        checked={createForm.destacado}
                         onChange={(event) =>
                           setCreateForm((prev) => ({
                             ...prev,
-                            porcentaje_oferta: event.target.value,
+                            destacado: event.target.checked,
                           }))
                         }
-                        className={styles.input}
-                        disabled={!createForm.en_oferta}
-                        style={{ width: '140px' }}
                       />
+                      Destacado
                     </label>
                   </div>
 

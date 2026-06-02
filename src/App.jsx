@@ -49,20 +49,10 @@ export default function App() {
         const data = await response.json();
         const mapped = data.map((item) => {
           const normalizedCategory = normalizeCategory(item.categoria || '');
-          const price = Number.isFinite(item.precio) ? item.precio : 0;
-          const discountPercent = Number(item.porcentaje_oferta || 0);
-          const isOffer = Boolean(item.en_oferta) && discountPercent > 0;
-          const originalPrice =
-            isOffer && discountPercent < 100 && price > 0
-              ? Math.round(price / (1 - discountPercent / 100))
-              : undefined;
-
           return {
             id: item.sku || String(item.id_catalogo),
             name: item.nombre || 'Producto sin nombre',
             description: item.descripcion || '',
-            price,
-            originalPrice,
             category: normalizedCategory || baseCategories[0],
             image: item.imagen || '/logonn-modified.png',
             featured: Boolean(item.destacado),
@@ -130,13 +120,6 @@ export default function App() {
   }, [products, searchQuery, activeCategory]);
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const cartTotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
-  const offerProducts = useMemo(
-    () => products.filter((p) => p.originalPrice && p.originalPrice > p.price),
-    [products]
-  );
-
   const featuredProductsList = useMemo(
     () => products.filter((p) => p.featured),
     [products]
@@ -188,19 +171,6 @@ export default function App() {
       <InfoSection />
 
       <ProductCarousel
-        id="offers-section"
-        title="Ofertas imperdibles"
-        subtitle="Precios exclusivos web"
-        icon="🔥"
-        themeColor="#dc2626"
-        products={offerProducts}
-        type="offer"
-        onProductClick={setSelectedProduct}
-        onAddToCart={addToCart}
-        isPaused={!!selectedProduct}
-      />
-
-      <ProductCarousel
         title="Productos destacados"
         subtitle="Calidad garantizada Semaforos Led"
         themeColor="var(--accent-500)"
@@ -231,7 +201,6 @@ export default function App() {
         setIsCartOpen={setIsCartOpen}
         cart={cart}
         cartCount={cartCount}
-        cartTotal={cartTotal}
         removeFromCart={removeFromCart}
         updateQuantity={updateQuantity}
       />
