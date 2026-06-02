@@ -46,4 +46,4 @@ jobs:
           # push en true SOLO si el código se fusionó en 'main'
           push: ${{ github.event_name == 'push' }}
           # Formato de la URL: ghcr.io/USUARIO/NOMBRE_IMAGEN:TAG
-          tags: ghcr.io/${{ github.repository_owner }}/miniecommerce-front:latest
+          tags: ghcr.io/${{ github.repository_owner }}/semaforosled-front:latest
