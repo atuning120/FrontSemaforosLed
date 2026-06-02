@@ -1,0 +1,46 @@
+.floatingWhatsApp {
+	position: fixed;
+	bottom: 2rem;
+	right: 2rem;
+	z-index: 50;
+	background: #25d366;
+	color: #fff;
+	padding: 1rem;
+	border-radius: 999px;
+	border: none;
+	cursor: pointer;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+	transition: transform 0.2s ease;
+
+	&:hover {
+		transform: scale(1.05);
+
+		.floatingTooltip {
+			opacity: 1;
+		}
+	}
+
+	.floatingTooltip {
+		position: absolute;
+		right: calc(100% + 1rem);
+		top: 50%;
+		transform: translateY(-50%);
+		background: #fff;
+		color: var(--brand-dark);
+		padding: 0.6rem 1rem;
+		border-radius: 0.9rem;
+		font-size: 0.7rem;
+		font-weight: 700;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.2s ease;
+		white-space: nowrap;
+		border: 1px solid rgba(11, 17, 32, 0.05);
+	}
+}
+
+@media (max-width: 768px) {
+	.floatingWhatsApp {
+		display: none;
+	}
+}

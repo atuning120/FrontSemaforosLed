@@ -1,0 +1,48 @@
+:global(:root) {
+	color-scheme: dark;
+	--font-sans: 'Inter', system-ui, sans-serif;
+	--font-display: 'Space Grotesk', sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+	--midnight: #020617;
+	--midnight-light: #0f172a;
+	--obsidian: #0b1120;
+	--accent-300: #93c5fd;
+	--accent-400: #60a5fa;
+	--accent-500: #3b82f6;
+	--accent-600: #2563eb;
+	--accent-700: #1d4ed8;
+	--accent-800: #1e40af;
+	--accent-900: #1e3a8a;
+	--text: #e5e5e5;
+	--muted: rgba(255, 255, 255, 0.32);
+	--brand-dark: #0b1120;
+	--brand-cream: #f4f1ea;
+}
+
+:global(*) {
+	box-sizing: border-box;
+}
+
+:global(body) {
+	margin: 0;
+	font-family: var(--font-sans);
+	background: var(--midnight);
+	color: var(--text);
+}
+
+:global(img) {
+	display: block;
+	max-width: 100%;
+}
+
+.page {
+	min-height: 100vh;
+	width: 100%;
+	background: var(--midnight);
+	color: rgba(255, 255, 255, 0.9);
+	font-family: var(--font-sans);
+
+	& ::selection {
+		background: rgba(59, 130, 246, 0.2);
+	}
+}
