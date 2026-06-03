@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash, Star } from 'lucide-react';
 import Filters from '../Filters.jsx';
 import styles from './AdminProducts.module.css';
 
@@ -12,6 +12,7 @@ const emptyForm = {
   categoria: BASE_CATEGORIES[0],
   moneda: 'ARS',
   imagen: '',
+  imagenes: [],
   destacado: false,
   id_catalogo: '',
   tamano_imagen: 'default',
@@ -63,6 +64,9 @@ export default function AdminProducts({ baseUrl, token }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('todos');
   const [dragActive, setDragActive] = useState(false);
+  const [draggedImgIdx, setDraggedImgIdx] = useState(null);
+  const [urlInputEdit, setUrlInputEdit] = useState('');
+  const [urlInputCreate, setUrlInputCreate] = useState('');
 
   const headers = useMemo(
     () => ({
@@ -119,6 +123,7 @@ export default function AdminProducts({ baseUrl, token }) {
       categoria: form.categoria,
       moneda: form.moneda.trim() || 'ARS',
       imagen: form.imagen.trim(),
+      imagenes: form.imagenes || [],
       destacado: Boolean(form.destacado),
       id_catalogo: idCatalogo,
       tamano_imagen: form.tamano_imagen || 'default',
@@ -196,6 +201,7 @@ export default function AdminProducts({ baseUrl, token }) {
       categoria: product.categoria || BASE_CATEGORIES[0],
       moneda: product.moneda || 'ARS',
       imagen: product.imagen || '',
+      imagenes: product.imagenes || [],
       destacado: Boolean(product.destacado),
       id_catalogo: product.id_catalogo ?? '',
       tamano_imagen: product.tamano_imagen || 'default',
@@ -294,35 +300,44 @@ export default function AdminProducts({ baseUrl, token }) {
   };
 
   const handleImageUpload = async (event, isEditForm) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-    const formData = new FormData();
-    formData.append('image', file);
+    setNotice('Subiendo imagen(es)...');
 
     try {
-      setNotice('Subiendo imagen...');
-      const response = await fetch(`${baseUrl}/api/admin/upload`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al subir imagen');
+      const urls = [];
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append('image', files[i]);
+
+        const response = await fetch(`${baseUrl}/api/admin/upload`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          body: formData
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Error al subir imagen');
+        }
+        urls.push(data.imageUrl.startsWith('/') ? `${baseUrl}${data.imageUrl}` : data.imageUrl);
       }
-      const newImageUrl = data.imageUrl.startsWith('/') ? `${baseUrl}${data.imageUrl}` : data.imageUrl;
       
+      const updateFn = (prev) => {
+        const newImagenes = [...(prev.imagenes || []), ...urls];
+        return { ...prev, imagen: prev.imagen || newImagenes[0] || '', imagenes: newImagenes };
+      };
+
       if (isEditForm) {
-        setEditForm((prev) => ({ ...prev, imagen: newImageUrl }));
+        setEditForm(updateFn);
       } else {
-        setCreateForm((prev) => ({ ...prev, imagen: newImageUrl }));
+        setCreateForm(updateFn);
       }
-      setNotice('Imagen subida correctamente.');
+      setNotice('Imagen(es) subida(s) correctamente.');
     } catch (err) {
-      setNotice(err.message || 'Error al subir imagen');
+      setNotice(err.message || 'Error al subir imagen(es)');
     }
   };
 
@@ -578,8 +593,75 @@ export default function AdminProducts({ baseUrl, token }) {
                     </p>
 
                     <div className={styles.productActions} />
+
                   </div>
                 </div>
+                
+                {/* INICIO GALERIA */}
+                {(editForm.imagenes?.length > 0 || editForm.imagen) && (
+                  <div className={styles.galleryContainer}>
+                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Galería de imágenes</p>
+                    <div className={styles.galleryList}>
+                      {(editForm.imagenes?.length > 0 ? editForm.imagenes : [editForm.imagen]).filter(img => img && img.trim() !== '').map((img, idx) => {
+                        const isMain = img === editForm.imagen;
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`${styles.galleryItem} ${isMain ? styles.galleryItemMain : ''}`}
+                            draggable
+                            onDragStart={(e) => {
+                              setDraggedImgIdx(idx);
+                              e.dataTransfer.effectAllowed = 'move';
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = 'move';
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              if (draggedImgIdx === null || draggedImgIdx === idx) return;
+                              setEditForm(prev => {
+                                const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen];
+                                const newImages = [...currentImages];
+                                const draggedImage = newImages.splice(draggedImgIdx, 1)[0];
+                                newImages.splice(idx, 0, draggedImage);
+                                return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                              });
+                              setDraggedImgIdx(null);
+                            }}
+                          >
+                            <img src={img} alt="Thumb" />
+                            <div className={styles.galleryActions}>
+                              {!isMain && (
+                                <button type="button" onClick={() => {
+                                  setEditForm(prev => {
+                                    // Move this image to the front of the array as well
+                                    const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen];
+                                    const newImages = currentImages.filter((_, i) => i !== idx);
+                                    newImages.unshift(img);
+                                    return { ...prev, imagenes: newImages, imagen: img };
+                                  });
+                                }} title="Fijar como portada">
+                                  <Star size={14} />
+                                </button>
+                              )}
+                              <button type="button" className={styles.deleteBtn} onClick={() => {
+                                setEditForm(prev => {
+                                  const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen];
+                                  const newImages = currentImages.filter((_, i) => i !== idx);
+                                  return { ...prev, imagenes: newImages, imagen: prev.imagen === img ? (newImages[0] || '') : prev.imagen };
+                                });
+                              }} title="Eliminar imagen">
+                                <Trash size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {/* FIN GALERIA */}
               </div>
 
               <div className={styles.modalFormArea}>
@@ -698,14 +780,30 @@ export default function AdminProducts({ baseUrl, token }) {
                     </div>
 
                     {editForm.upload_mode === 'url' ? (
-                      <input
-                        value={editForm.imagen}
-                        onChange={(event) =>
-                          setEditForm((prev) => ({ ...prev, imagen: formatImageUrl(event.target.value) }))
-                        }
-                        className={styles.input}
-                        placeholder="https://ejemplo.com/imagen.jpg"
-                      />
+                      <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                        <input
+                          value={urlInputEdit}
+                          onChange={(e) => setUrlInputEdit(e.target.value)}
+                          className={styles.input}
+                          placeholder="https://ejemplo.com/imagen.jpg"
+                        />
+                        <button 
+                          type="button" 
+                          className={styles.secondary}
+                          onClick={() => {
+                            const url = urlInputEdit.trim();
+                            if (!url) return;
+                            const formatted = formatImageUrl(url);
+                            setEditForm((prev) => {
+                              const newImagenes = [...(prev.imagenes || []), formatted];
+                              return { ...prev, imagenes: newImagenes, imagen: prev.imagen || newImagenes[0] || '' };
+                            });
+                            setUrlInputEdit('');
+                          }}
+                        >
+                          Agregar imagen
+                        </button>
+                      </div>
                     ) : (
                       <div
                         className={`${styles.dropzone} ${dragActive ? styles.dragActive : ''}`}
@@ -714,27 +812,14 @@ export default function AdminProducts({ baseUrl, token }) {
                         onDragOver={handleDragOver}
                         onDrop={(e) => handleDrop(e, true)}
                       >
-                        {editForm.imagen && editForm.upload_mode === 'upload' ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                            <img src={editForm.imagen} alt="Preview" style={{ height: '80px', borderRadius: '0.5rem', objectFit: 'contain' }} />
-                            <p style={{ margin: 0, fontWeight: 500 }}>Imagen lista</p>
-                            <label className={styles.secondary} style={{ cursor: 'pointer', margin: 0, display: 'inline-block' }}>
-                              Cambiar archivo
-                              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, true)} style={{ display: 'none' }} />
-                            </label>
-                          </div>
-                        ) : (
-                          <>
-                            <p>Arrastra tu imagen aquí o haz clic para subir</p>
-                            <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
-                              Formatos: JPG, PNG, WEBP, AVIF
-                            </p>
-                            <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
-                              Seleccionar archivo
-                              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, true)} style={{ display: 'none' }} />
-                            </label>
-                          </>
-                        )}
+                        <p>Arrastra tu(s) imagen(es) aquí o haz clic para subir</p>
+                        <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
+                          Formatos: JPG, PNG, WEBP, AVIF
+                        </p>
+                        <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
+                          Seleccionar archivo(s)
+                          <input type="file" accept="image/*" multiple onChange={(e) => handleImageUpload(e, true)} style={{ display: 'none' }} />
+                        </label>
                       </div>
                     )}
                   </div>
@@ -807,8 +892,75 @@ export default function AdminProducts({ baseUrl, token }) {
                     </p>
 
                     <div className={styles.productActions} />
+
                   </div>
                 </div>
+                
+                {/* INICIO GALERIA */}
+                {(createForm.imagenes?.length > 0 || createForm.imagen) && (
+                  <div className={styles.galleryContainer}>
+                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Galería de imágenes</p>
+                    <div className={styles.galleryList}>
+                      {(createForm.imagenes?.length > 0 ? createForm.imagenes : [createForm.imagen]).filter(img => img && img.trim() !== '').map((img, idx) => {
+                        const isMain = img === createForm.imagen;
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`${styles.galleryItem} ${isMain ? styles.galleryItemMain : ''}`}
+                            draggable
+                            onDragStart={(e) => {
+                              setDraggedImgIdx(idx);
+                              e.dataTransfer.effectAllowed = 'move';
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = 'move';
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              if (draggedImgIdx === null || draggedImgIdx === idx) return;
+                              setCreateForm(prev => {
+                                const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen];
+                                const newImages = [...currentImages];
+                                const draggedImage = newImages.splice(draggedImgIdx, 1)[0];
+                                newImages.splice(idx, 0, draggedImage);
+                                return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                              });
+                              setDraggedImgIdx(null);
+                            }}
+                          >
+                            <img src={img} alt="Thumb" />
+                            <div className={styles.galleryActions}>
+                              {!isMain && (
+                                <button type="button" onClick={() => {
+                                  setCreateForm(prev => {
+                                    // Move this image to the front of the array as well
+                                    const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen];
+                                    const newImages = currentImages.filter((_, i) => i !== idx);
+                                    newImages.unshift(img);
+                                    return { ...prev, imagenes: newImages, imagen: img };
+                                  });
+                                }} title="Fijar como portada">
+                                  <Star size={14} />
+                                </button>
+                              )}
+                              <button type="button" className={styles.deleteBtn} onClick={() => {
+                                setCreateForm(prev => {
+                                  const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen];
+                                  const newImages = currentImages.filter((_, i) => i !== idx);
+                                  return { ...prev, imagenes: newImages, imagen: prev.imagen === img ? (newImages[0] || '') : prev.imagen };
+                                });
+                              }} title="Eliminar imagen">
+                                <Trash size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {/* FIN GALERIA */}
               </div>
 
               <div className={styles.modalFormArea}>
@@ -940,14 +1092,30 @@ export default function AdminProducts({ baseUrl, token }) {
                     </div>
 
                     {createForm.upload_mode === 'url' ? (
-                      <input
-                        value={createForm.imagen}
-                        onChange={(event) =>
-                          setCreateForm((prev) => ({ ...prev, imagen: formatImageUrl(event.target.value) }))
-                        }
-                        className={styles.input}
-                        placeholder="https://ejemplo.com/imagen.jpg"
-                      />
+                      <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                        <input
+                          value={urlInputCreate}
+                          onChange={(e) => setUrlInputCreate(e.target.value)}
+                          className={styles.input}
+                          placeholder="https://ejemplo.com/imagen.jpg"
+                        />
+                        <button 
+                          type="button" 
+                          className={styles.secondary}
+                          onClick={() => {
+                            const url = urlInputCreate.trim();
+                            if (!url) return;
+                            const formatted = formatImageUrl(url);
+                            setCreateForm((prev) => {
+                              const newImagenes = [...(prev.imagenes || []), formatted];
+                              return { ...prev, imagenes: newImagenes, imagen: prev.imagen || newImagenes[0] || '' };
+                            });
+                            setUrlInputCreate('');
+                          }}
+                        >
+                          Agregar imagen
+                        </button>
+                      </div>
                     ) : (
                       <div
                         className={`${styles.dropzone} ${dragActive ? styles.dragActive : ''}`}
@@ -956,27 +1124,14 @@ export default function AdminProducts({ baseUrl, token }) {
                         onDragOver={handleDragOver}
                         onDrop={(e) => handleDrop(e, false)}
                       >
-                        {createForm.imagen && createForm.upload_mode === 'upload' ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                            <img src={createForm.imagen} alt="Preview" style={{ height: '80px', borderRadius: '0.5rem', objectFit: 'contain' }} />
-                            <p style={{ margin: 0, fontWeight: 500 }}>Imagen lista</p>
-                            <label className={styles.secondary} style={{ cursor: 'pointer', margin: 0, display: 'inline-block' }}>
-                              Cambiar archivo
-                              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, false)} style={{ display: 'none' }} />
-                            </label>
-                          </div>
-                        ) : (
-                          <>
-                            <p>Arrastra tu imagen aquí o haz clic para subir</p>
-                            <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
-                              Formatos: JPG, PNG, WEBP, AVIF
-                            </p>
-                            <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
-                              Seleccionar archivo
-                              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, false)} style={{ display: 'none' }} />
-                            </label>
-                          </>
-                        )}
+                        <p>Arrastra tu(s) imagen(es) aquí o haz clic para subir</p>
+                        <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
+                          Formatos: JPG, PNG, WEBP, AVIF
+                        </p>
+                        <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
+                          Seleccionar archivo(s)
+                          <input type="file" accept="image/*" multiple onChange={(e) => handleImageUpload(e, false)} style={{ display: 'none' }} />
+                        </label>
                       </div>
                     )}
                   </div>

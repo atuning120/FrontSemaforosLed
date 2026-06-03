@@ -1,8 +1,11 @@
-import { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './ProductModal.module.css';
 
 export default function ProductModal({ product, onClose, onAddToCart }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = product.images?.length > 0 ? product.images : (product.image ? [product.image] : []);
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
 
@@ -33,12 +36,49 @@ export default function ProductModal({ product, onClose, onAddToCart }) {
         </button>
 
         <div className={styles.media}>
-          {product.image?.trim() ? (
-            <img
-              src={product.image}
-              alt={product.name}
-              referrerPolicy="no-referrer"
-            />
+          {images.length > 0 ? (
+            <>
+              <img
+                src={images[currentImageIndex]}
+                alt={`${product.name} - Imagen ${currentImageIndex + 1}`}
+                referrerPolicy="no-referrer"
+              />
+              {images.length > 1 && (
+                <>
+                  <button 
+                    className={`${styles.carouselBtn} ${styles.carouselBtnLeft}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+                    }}
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button 
+                    className={`${styles.carouselBtn} ${styles.carouselBtnRight}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+                    }}
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                  <div className={styles.carouselIndicators}>
+                    {images.map((_, idx) => (
+                      <button
+                        key={idx}
+                        className={`${styles.indicator} ${idx === currentImageIndex ? styles.indicatorActive : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentImageIndex(idx);
+                        }}
+                        aria-label={`Ir a la imagen ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
           ) : (
             <div className={styles.noImage}>No hay imagen</div>
           )}

@@ -70,6 +70,51 @@
         background: rgba(2, 6, 23, 0.35);
       }
 
+      .carouselBtn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(15, 23, 42, 0.65);
+        border: none;
+        color: white;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 5;
+      }
+      .carouselBtnLeft {
+        left: 1rem;
+      }
+      .carouselBtnRight {
+        right: 1rem;
+      }
+
+      .carouselIndicators {
+        position: absolute;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 0.5rem;
+        z-index: 5;
+      }
+      .indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        border: none;
+        padding: 0;
+        cursor: pointer;
+      }
+      .indicatorActive {
+        background: rgba(255, 255, 255, 0.9);
+      }
+
       .badges {
         position: absolute;
         top: 1rem;

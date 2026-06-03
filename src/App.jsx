@@ -55,6 +55,7 @@ export default function App() {
             description: item.descripcion || '',
             category: normalizedCategory || baseCategories[0],
             image: item.imagen || '/logonn-modified.png',
+            images: item.imagenes || [],
             featured: Boolean(item.destacado),
             tamano_imagen: item.tamano_imagen || 'default',
             raw: item,
