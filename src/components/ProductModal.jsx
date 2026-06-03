@@ -37,56 +37,40 @@ export default function ProductModal({ product, onClose, onAddToCart }) {
 
         <div className={styles.media}>
           {images.length > 0 ? (
-            <>
+            <div className={styles.mainImageContainer}>
               <img
                 src={images[currentImageIndex]}
-                alt={`${product.name} - Imagen ${currentImageIndex + 1}`}
+                alt={`${product.name} - Imagen principal`}
                 referrerPolicy="no-referrer"
+                className={styles.mainImage}
               />
-              {images.length > 1 && (
-                <>
-                  <button 
-                    className={`${styles.carouselBtn} ${styles.carouselBtnLeft}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-                    }}
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                  <button 
-                    className={`${styles.carouselBtn} ${styles.carouselBtnRight}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-                    }}
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-                  <div className={styles.carouselIndicators}>
-                    {images.map((_, idx) => (
-                      <button
-                        key={idx}
-                        className={`${styles.indicator} ${idx === currentImageIndex ? styles.indicatorActive : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentImageIndex(idx);
-                        }}
-                        aria-label={`Ir a la imagen ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-            </>
-          ) : (
-            <div className={styles.noImage}>No hay imagen</div>
-          )}
-          {product.raw?.destacado && (
-            <div className={styles.badges}>
               {product.raw?.destacado && (
-                <span className={styles.badgeFeatured}>Destacado</span>
+                <div className={styles.badges}>
+                  <span className={styles.badgeFeatured}>Destacado</span>
+                </div>
               )}
+            </div>
+          ) : (
+            <div className={styles.mainImageContainer}>
+              <div className={styles.noImage}>No hay imagen</div>
+            </div>
+          )}
+
+          {images.length > 1 && (
+            <div className={styles.thumbnailGallery}>
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  className={`${styles.thumbnailBtn} ${idx === currentImageIndex ? styles.thumbnailActive : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex(idx);
+                  }}
+                  aria-label={`Ver imagen ${idx + 1}`}
+                >
+                  <img src={img} alt={`Miniatura ${idx + 1}`} referrerPolicy="no-referrer" />
+                </button>
+              ))}
             </div>
           )}
         </div>
