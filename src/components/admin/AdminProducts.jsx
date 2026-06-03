@@ -190,6 +190,8 @@ export default function AdminProducts({ baseUrl, token }) {
 
   const openCreate = () => {
     resetNotice();
+    setSelectedImageIdxCreate(null);
+    setSelectedImageIdxEdit(null);
     const nextCatalogId = getNextCatalogId(products);
     setCreateForm((prev) => ({
       ...emptyForm,
@@ -201,11 +203,15 @@ export default function AdminProducts({ baseUrl, token }) {
   };
 
   const closeCreate = () => {
+    setSelectedImageIdxCreate(null);
+    setSelectedImageIdxEdit(null);
     setIsCreateOpen(false);
   };
 
   const startEdit = (product) => {
     resetNotice();
+    setSelectedImageIdxEdit(null);
+    setSelectedImageIdxCreate(null);
     setEditingSku(product.sku);
     setEditForm({
       sku: product.sku || '',
