@@ -155,19 +155,21 @@ select {
   position: relative;
   transition: border 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 
-  &:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 22px 40px rgba(2, 6, 23, 0.6);
+  @media (hover: hover) {
+    &:hover {
+      border-color: rgba(59, 130, 246, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 22px 40px rgba(2, 6, 23, 0.6);
 
-    .productMedia img {
-      transform: scale(1.05);
-      opacity: 1;
-    }
+      .productMedia img {
+        transform: scale(1.05);
+        opacity: 1;
+      }
 
-    .adminOverlay {
-      opacity: 1;
-      pointer-events: auto;
+      .adminOverlay {
+        opacity: 1;
+        pointer-events: auto;
+      }
     }
   }
 }
@@ -322,7 +324,6 @@ select {
   width: 70%;
   background: var(--accent-600);
   color: #fff;
-  pointer-events: auto;
 
   &:hover {
     background: var(--accent-500);
@@ -342,6 +343,38 @@ select {
 @media (max-width: 768px) {
   .productCard {
     border-radius: 1rem;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.05);
+      transform: none;
+      box-shadow: 0 18px 35px rgba(2, 6, 23, 0.5);
+
+      .productMedia img {
+        transform: none;
+        opacity: 0.7;
+      }
+
+      .adminOverlay {
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+
+    &.activeMobileCard {
+      border-color: rgba(59, 130, 246, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 22px 40px rgba(2, 6, 23, 0.6);
+
+      .productMedia img {
+        transform: scale(1.05);
+        opacity: 1;
+      }
+
+      .adminOverlay {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
 
     .productMedia {
       height: clamp(120px, 30vw, 160px);

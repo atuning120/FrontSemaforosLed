@@ -69,6 +69,17 @@ export default function AdminProducts({ baseUrl, token }) {
   const [urlInputCreate, setUrlInputCreate] = useState('');
   const [selectedImageIdxEdit, setSelectedImageIdxEdit] = useState(null);
   const [selectedImageIdxCreate, setSelectedImageIdxCreate] = useState(null);
+  const [activeMobileCard, setActiveMobileCard] = useState(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(`.${styles.productCard}`)) {
+        setActiveMobileCard(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const headers = useMemo(
     () => ({
@@ -456,7 +467,17 @@ export default function AdminProducts({ baseUrl, token }) {
         <div className={styles.productsGrid}>
           {paginatedProducts.map((product) => {
             return (
-              <div key={product.sku} className={styles.productCard}>
+              <div 
+                key={product.sku} 
+                className={`${styles.productCard} ${activeMobileCard === product.sku ? styles.activeMobileCard : ''}`}
+                onClick={(e) => {
+                  if (window.innerWidth <= 768) {
+                    if (!e.target.closest(`.${styles.overlayBtn}`)) {
+                      setActiveMobileCard(prev => prev === product.sku ? null : product.sku);
+                    }
+                  }
+                }}
+              >
                 <div className={getMediaClass(product.tamano_imagen)}>
                   {product.imagen?.trim() ? (
                     <img
