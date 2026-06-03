@@ -4,6 +4,7 @@ import AdminProducts from './AdminProducts.jsx';
 import AdminOrderForm from './AdminOrderForm.jsx';
 import AdminOrders from './AdminOrders.jsx';
 import AdminSettings from './AdminSettings.jsx';
+import AdminHero from './AdminHero.jsx';
 import styles from './AdminApp.module.css';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -12,6 +13,7 @@ const VIEWS = [
   { key: 'products', label: 'Productos' },
   { key: 'create-order', label: 'Crear orden' },
   { key: 'orders', label: 'Ordenes' },
+  { key: 'hero', label: 'Hero' },
   { key: 'settings', label: 'Configuración' },
 ];
 
@@ -108,10 +110,13 @@ export default function AdminApp() {
         {view === 'create-order' && (
           <AdminOrderForm baseUrl={BASE_URL} token={token} />
         )}
-        {view === 'orders' && (
+        { view === 'orders' && (
           <AdminOrders baseUrl={BASE_URL} token={token} />
         )}
-        {view === 'settings' && (
+        { view === 'hero' && (
+          <AdminHero baseUrl={BASE_URL} token={token} />
+        )}
+        { view === 'settings' && (
           <AdminSettings baseUrl={BASE_URL} token={token} onCredentialsUpdated={handleLogin} />
         )}
       </main>
