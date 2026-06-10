@@ -159,7 +159,7 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%) scale(0.85);
+  transform: translate(-50%, -50%) scale(0.9);
   transform-origin: center center;
   border-radius: 1.5rem;
   overflow: hidden;
@@ -167,20 +167,24 @@
   border: 1px solid rgba(255,255,255,0.15);
 }
 
-@media (max-width: 1600px) {
-  .canvasScaleWrapper {
-    transform: translate(-50%, -50%) scale(0.75);
-  }
+/* DESKTOP (Sidebar + Properties Panel = ~600px) */
+@media (max-width: 1920px) {
+  .canvasScaleWrapper { transform: translate(-50%, -50%) scale(0.8); }
 }
-@media (max-width: 1400px) {
-  .canvasScaleWrapper {
-    transform: translate(-50%, -50%) scale(0.65);
-  }
+@media (max-width: 1750px) {
+  .canvasScaleWrapper { transform: translate(-50%, -50%) scale(0.7); }
+}
+@media (max-width: 1600px) {
+  .canvasScaleWrapper { transform: translate(-50%, -50%) scale(0.58); }
+}
+@media (max-width: 1440px) {
+  .canvasScaleWrapper { transform: translate(-50%, -50%) scale(0.52); }
+}
+@media (max-width: 1366px) {
+  .canvasScaleWrapper { transform: translate(-50%, -50%) scale(0.42); }
 }
 @media (max-width: 1200px) {
-  .canvasScaleWrapper {
-    transform: translate(-50%, -50%) scale(0.5);
-  }
+  .canvasScaleWrapper { transform: translate(-50%, -50%) scale(0.28); }
 }
 
 .emptyCanvas {
@@ -190,7 +194,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
+  width: 100%;
+  height: 100%;
 }
 
 .emptyIcon {
@@ -387,4 +394,186 @@
 @keyframes slideUp {
   from { opacity: 0; transform: translate(-50%, 1rem); }
   to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Modal Overlay and Confirm Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirmModal {
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 400px;
+  color: white;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.confirmModal h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.confirmModal p {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.confirmActions button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.confirmActions .danger {
+  background: #ef4444;
+  color: white;
+}
+.confirmActions .danger:hover {
+  background: #dc2626;
+}
+
+.confirmActions .secondary {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+.confirmActions .secondary:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* Responsividad para la vista de edición de Hero */
+@media (max-width: 1024px) {
+  .workspace {
+    flex-direction: column;
+    height: auto;
+    min-height: auto;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .slideList {
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1rem;
+  }
+
+  .slideList::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .slideThumbnail {
+    width: 130px;
+    min-width: 130px;
+    flex-shrink: 0;
+  }
+
+  .canvasArea {
+    min-height: 550px;
+    width: 100%;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .canvasScaleWrapper {
+    transform: translate(-50%, -50%) scale(0.62);
+  }
+
+  .propertiesPanel {
+    width: 100%;
+    border-left: none;
+  }
+  
+  .panelBody {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 900px) {
+  .canvasScaleWrapper {
+    transform: translate(-50%, -50%) scale(0.53);
+  }
+}
+
+@media (max-width: 768px) {
+  .canvasArea {
+    min-height: 440px;
+  }
+  .canvasScaleWrapper {
+    transform: translate(-50%, -50%) scale(0.41);
+  }
+}
+
+@media (max-width: 600px) {
+  .canvasArea {
+    min-height: 380px;
+  }
+  .canvasScaleWrapper {
+    transform: translate(-50%, -50%) scale(0.33);
+  }
+}
+
+@media (max-width: 480px) {
+  .canvasArea {
+    min-height: 280px;
+  }
+  .canvasScaleWrapper {
+    transform: translate(-50%, -50%) scale(0.26);
+  }
+  
+  .slideThumbnail {
+    width: 100px;
+    min-width: 100px;
+  }
+  
+  .slideThumbnail .thumbnailLabel {
+    padding: 1rem 0.5rem 0.3rem;
+    font-size: 0.65rem;
+  }
+  
+  .slideThumbnail .orderBadge {
+    top: 0.25rem;
+    left: 0.25rem;
+    font-size: 0.55rem;
+    padding: 0.1rem 0.3rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .canvasArea {
+    min-height: 240px;
+  }
+  .canvasScaleWrapper {
+    transform: translate(-50%, -50%) scale(0.22);
+  }
 }

@@ -15,7 +15,7 @@ export default function ProductCatalog({
   setActiveCategory,
   categories,
   onProductClick,
-  onAddToCart,
+  onQuote,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -91,7 +91,7 @@ export default function ProductCatalog({
                 product={product}
                 type="default"
                 onProductClick={onProductClick}
-                onAddToCart={onAddToCart}
+                onQuote={onQuote}
               />
             ))}
         </div>

@@ -1,7 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash, Save, MessageCircle, MapPin, CreditCard, Building, Clock, Layout } from 'lucide-react';
+import { Plus, Trash, Save, MessageCircle, MapPin, CreditCard, Building, Clock, Layout, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { polyfill } from "mobile-drag-drop";
+import "mobile-drag-drop/default.css";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import styles from './AdminHero.module.css';
 import heroStyles from '../Hero.module.css';
+
+// Habilitar Drag & Drop en dispositivos móviles manteniendo presionado 1 segundo
+polyfill({
+  holdToDrag: 1000,
+});
+
+// Requisito para navegadores móviles modernos (iOS Safari, Chrome Android)
+// Permite que el polyfill pueda detener el scroll nativo al iniciar el arrastre
+window.addEventListener('touchmove', function() {}, {passive: false});
 
 const emptyForm = {
   badge: '',
@@ -29,6 +41,7 @@ export default function AdminHero({ baseUrl, token }) {
   const [isSaving, setIsSaving] = useState(false);
   const [notice, setNotice] = useState('');
   const [draggedScreenId, setDraggedScreenId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const headers = useMemo(
     () => ({
@@ -159,15 +172,19 @@ export default function AdminHero({ baseUrl, token }) {
 
   const handleDelete = async () => {
     if (!selectedId) return;
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
     const isNew = selectedId.toString().startsWith('new_');
 
     if (isNew) {
       setScreens(screens.filter(s => s._id !== selectedId));
       setSelectedId(null);
+      setShowDeleteModal(false);
+      showToast('Pantalla eliminada');
       return;
     }
-
-    if (!window.confirm('¿Eliminar esta pantalla de forma permanente?')) return;
 
     try {
       const response = await fetch(`${baseUrl}/api/admin/hero/${selectedId}`, {
@@ -181,8 +198,10 @@ export default function AdminHero({ baseUrl, token }) {
       showToast('Pantalla eliminada');
       setScreens(screens.filter(s => s._id !== selectedId));
       setSelectedId(null);
+      setShowDeleteModal(false);
     } catch (err) {
       showToast(err.message || 'Error al eliminar');
+      setShowDeleteModal(false);
     }
   };
 
@@ -379,12 +398,35 @@ export default function AdminHero({ baseUrl, token }) {
       </div>
 
       {/* CANVAS AREA: Live Preview */}
-      <div className={styles.canvasArea}>
+      <div className={styles.canvasArea} ref={(node) => {
+        if (node && !node.dataset.scaleSet) {
+          node.dataset.scaleSet = 'true';
+        }
+      }}>
         {selectedId ? (
-          <div className={styles.canvasContainer}>
-            <div className={styles.canvasScaleWrapper}>
-              {renderPreview()}
-            </div>
+          <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
+            <TransformWrapper
+              initialScale={window.innerWidth <= 480 ? 0.26 : window.innerWidth <= 600 ? 0.33 : window.innerWidth <= 768 ? 0.41 : window.innerWidth <= 900 ? 0.53 : window.innerWidth <= 1024 ? 0.62 : window.innerWidth <= 1200 ? 0.4 : window.innerWidth <= 1366 ? 0.5 : window.innerWidth <= 1600 ? 0.6 : 0.8}
+              minScale={0.1}
+              maxScale={3}
+              centerOnInit={true}
+              limitToBounds={false}
+            >
+              {({ zoomIn, zoomOut, resetTransform }) => (
+                <div style={{ width: '100%', height: '100%' }}>
+                  <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(0,0,0,0.5)', padding: '0.5rem', borderRadius: '0.5rem', backdropFilter: 'blur(4px)' }}>
+                    <button onClick={() => zoomIn()} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><ZoomIn size={18} /></button>
+                    <button onClick={() => zoomOut()} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><ZoomOut size={18} /></button>
+                    <button onClick={() => resetTransform()} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><Maximize size={18} /></button>
+                  </div>
+                  <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+                    <div style={{ width: '1400px', height: '800px', borderRadius: '1.5rem', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: '#000' }}>
+                      {renderPreview()}
+                    </div>
+                  </TransformComponent>
+                </div>
+              )}
+            </TransformWrapper>
           </div>
         ) : (
           <div className={styles.emptyCanvas}>
@@ -495,6 +537,27 @@ export default function AdminHero({ baseUrl, token }) {
             <button className={styles.saveBtn} onClick={handleSave} disabled={isSaving}>
               <Save size={18} /> {isSaving ? 'Guardando...' : 'Guardar Cambios'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMACIÓN DE BORRADO */}
+      {showDeleteModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowDeleteModal(false)}>
+          <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
+            <h3>Confirmar eliminación</h3>
+            <p>
+              ¿Estás seguro de que deseas eliminar esta pantalla de forma permanente?
+              Esta acción no se puede deshacer.
+            </p>
+            <div className={styles.confirmActions}>
+              <button type="button" className={styles.danger} onClick={confirmDelete}>
+                Eliminar
+              </button>
+              <button type="button" className={styles.secondary} onClick={() => setShowDeleteModal(false)}>
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}

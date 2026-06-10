@@ -1,8 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import AdminLogin from './AdminLogin.jsx';
 import AdminProducts from './AdminProducts.jsx';
-import AdminOrderForm from './AdminOrderForm.jsx';
-import AdminOrders from './AdminOrders.jsx';
 import AdminSettings from './AdminSettings.jsx';
 import AdminHero from './AdminHero.jsx';
 import styles from './AdminApp.module.css';
@@ -11,9 +9,7 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const VIEWS = [
   { key: 'products', label: 'Productos' },
-  { key: 'create-order', label: 'Crear orden' },
-  { key: 'orders', label: 'Ordenes' },
-  { key: 'hero', label: 'Hero' },
+  { key: 'hero', label: 'Banner' },
   { key: 'settings', label: 'Configuración' },
 ];
 
@@ -92,9 +88,8 @@ export default function AdminApp() {
                 key={item.key}
                 type="button"
                 onClick={() => setView(item.key)}
-                className={`${styles.navButton} ${
-                  view === item.key ? styles.navButtonActive : ''
-                }`}
+                className={`${styles.navButton} ${view === item.key ? styles.navButtonActive : ''
+                  }`}
               >
                 {item.label}
               </button>
@@ -107,16 +102,10 @@ export default function AdminApp() {
         {view === 'products' && (
           <AdminProducts baseUrl={BASE_URL} token={token} />
         )}
-        {view === 'create-order' && (
-          <AdminOrderForm baseUrl={BASE_URL} token={token} />
-        )}
-        { view === 'orders' && (
-          <AdminOrders baseUrl={BASE_URL} token={token} />
-        )}
-        { view === 'hero' && (
+        {view === 'hero' && (
           <AdminHero baseUrl={BASE_URL} token={token} />
         )}
-        { view === 'settings' && (
+        {view === 'settings' && (
           <AdminSettings baseUrl={BASE_URL} token={token} onCredentialsUpdated={handleLogin} />
         )}
       </main>

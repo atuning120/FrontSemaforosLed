@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import styles from './ProductModal.module.css';
 
-export default function ProductModal({ product, onClose, onAddToCart }) {
+export default function ProductModal({ product, onClose, onQuote }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const images = product.images?.length > 0 ? product.images : (product.image ? [product.image] : []);
 
@@ -83,9 +83,10 @@ export default function ProductModal({ product, onClose, onAddToCart }) {
           <button
             type="button"
             className={styles.primary}
-            onClick={() => onAddToCart(product)}
+            onClick={() => onQuote(product)}
           >
-            Agregar al carrito
+            <MessageCircle size={20} />
+            Cotizar por WhatsApp
           </button>
         </div>
       </div>

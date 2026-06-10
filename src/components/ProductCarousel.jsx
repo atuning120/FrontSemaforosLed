@@ -11,7 +11,7 @@ export default function ProductCarousel({
   products,
   type,
   onProductClick,
-  onAddToCart,
+  onQuote,
   isPaused,
 }) {
   const carouselRef = useRef(null);
@@ -186,7 +186,7 @@ export default function ProductCarousel({
                   type={type}
                   isCarousel={true}
                   onProductClick={onProductClick}
-                  onAddToCart={onAddToCart}
+                  onQuote={onQuote}
                 />
               ))}
             </div>

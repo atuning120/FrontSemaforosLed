@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { ShoppingCart } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import styles from './ProductCard.module.css';
 
 const ProductCard = forwardRef(({
@@ -7,7 +7,7 @@ const ProductCard = forwardRef(({
   isCarousel = false,
   type = 'default',
   onProductClick,
-  onAddToCart,
+  onQuote,
   ...props
 }, ref) => {
   const isFeatured = type === 'featured' || product.featured;
@@ -59,12 +59,12 @@ const ProductCard = forwardRef(({
           <button
             onClick={(event) => {
               event.stopPropagation();
-              onAddToCart(product);
+              onQuote(product);
             }}
             className={styles.cta}
           >
-            <ShoppingCart className={styles.ctaIcon} aria-hidden="true" />
-            Agregar
+            <MessageCircle className={styles.ctaIcon} aria-hidden="true" />
+            Cotizar
           </button>
         </div>
       </div>
