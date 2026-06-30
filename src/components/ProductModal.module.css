@@ -11,8 +11,11 @@
 
   .modal {
     position: relative;
-    max-width: 860px;
+    max-width: 1100px;
     width: 100%;
+    min-height: 600px;
+    height: 80vh;
+    max-height: 800px;
     background: var(--midnight-light);
     border-radius: 1.5rem;
     overflow: hidden;
@@ -47,27 +50,86 @@
     }
 
     .media {
-      position: relative;
+      display: flex;
+      flex-direction: column;
       background: rgba(0, 0, 0, 0.4);
       min-height: 280px;
 
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .noImage {
-        width: 100%;
-        height: 100%;
+      .mainImageContainer {
+        position: relative;
+        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        text-transform: uppercase;
-        letter-spacing: 0.2em;
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.55);
-        background: rgba(2, 6, 23, 0.35);
+        min-height: 200px;
+        width: 100%;
+        background: rgba(0,0,0,0.2);
+        
+        .mainImage {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          position: absolute;
+          inset: 0;
+        }
+
+        .noImage {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          font-size: 0.7rem;
+          color: rgba(255, 255, 255, 0.55);
+          background: rgba(2, 6, 23, 0.35);
+          position: absolute;
+          inset: 0;
+        }
+      }
+
+      .thumbnailGallery {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: rgba(2, 6, 23, 0.5);
+        overflow-x: auto;
+        
+        &::-webkit-scrollbar {
+          height: 4px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.2);
+          border-radius: 4px;
+        }
+
+        .thumbnailBtn {
+          flex: 0 0 60px;
+          height: 60px;
+          padding: 0;
+          border: 2px solid transparent;
+          border-radius: 0.5rem;
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          background: rgba(0,0,0,0.2);
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          &:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+          }
+        }
+
+        .thumbnailActive {
+          border-color: var(--accent-500);
+          transform: scale(1.05);
+        }
       }
 
       .badges {
@@ -115,10 +177,25 @@
         font-family: var(--font-display);
       }
 
+      overflow: hidden;
+
       p {
         margin: 0;
         color: rgba(255, 255, 255, 0.6);
         line-height: 1.5;
+        white-space: pre-wrap;
+        font-family: inherit;
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+
+        &::-webkit-scrollbar {
+          width: 4px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 4px;
+        }
       }
 
       .tag {
@@ -151,22 +228,47 @@
       .primary {
         margin-top: auto;
         border: none;
-        background: var(--accent-600);
+        background: #25D366;
         color: #fff;
         padding: 0.8rem 1.4rem;
         border-radius: 999px;
         cursor: pointer;
         font-weight: 600;
         letter-spacing: 0.02em;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        
+        &:hover {
+          background: #128C7E;
+        }
       }
     }
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .overlay {
+    align-items: center;
+    padding: 1.5rem 1rem;
+
     .modal {
+      display: flex;
+      flex-direction: column;
+      height: 85vh;
+      min-height: 600px;
+      max-height: 92vh;
+      overflow: hidden;
+      
+      .media {
+        flex: 0 0 350px;
+        min-height: 350px;
+      }
+      
       .content {
+        flex: 1;
         padding: 1.5rem;
       }
     }

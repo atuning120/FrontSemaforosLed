@@ -1,8 +1,11 @@
-import { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import styles from './ProductModal.module.css';
 
-export default function ProductModal({ product, onClose, onAddToCart }) {
+export default function ProductModal({ product, onClose, onQuote }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = product.images?.length > 0 ? product.images : (product.image ? [product.image] : []);
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
 
@@ -19,11 +22,6 @@ export default function ProductModal({ product, onClose, onAddToCart }) {
     };
   }, [onClose]);
 
-  const percentage = Number(product.raw?.porcentaje_oferta || 0);
-  const hasOffer = Boolean(product.raw?.en_oferta) && percentage > 0;
-  const oldPrice = hasOffer
-    ? Math.round(product.price / (1 - percentage / 100))
-    : null;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -38,23 +36,41 @@ export default function ProductModal({ product, onClose, onAddToCart }) {
         </button>
 
         <div className={styles.media}>
-          {product.image?.trim() ? (
-            <img
-              src={product.image}
-              alt={product.name}
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className={styles.noImage}>No hay imagen</div>
-          )}
-          {(hasOffer || product.raw?.destacado) && (
-            <div className={styles.badges}>
-              {hasOffer && (
-                <span className={styles.badgeOffer}>Oferta {percentage}%</span>
-              )}
+          {images.length > 0 ? (
+            <div className={styles.mainImageContainer}>
+              <img
+                src={images[currentImageIndex]}
+                alt={`${product.name} - Imagen principal`}
+                referrerPolicy="no-referrer"
+                className={styles.mainImage}
+              />
               {product.raw?.destacado && (
-                <span className={styles.badgeFeatured}>Destacado</span>
+                <div className={styles.badges}>
+                  <span className={styles.badgeFeatured}>Destacado</span>
+                </div>
               )}
+            </div>
+          ) : (
+            <div className={styles.mainImageContainer}>
+              <div className={styles.noImage}>No hay imagen</div>
+            </div>
+          )}
+
+          {images.length > 1 && (
+            <div className={styles.thumbnailGallery}>
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  className={`${styles.thumbnailBtn} ${idx === currentImageIndex ? styles.thumbnailActive : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex(idx);
+                  }}
+                  aria-label={`Ver imagen ${idx + 1}`}
+                >
+                  <img src={img} alt={`Miniatura ${idx + 1}`} referrerPolicy="no-referrer" />
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -64,21 +80,13 @@ export default function ProductModal({ product, onClose, onAddToCart }) {
           <h2>{product.name}</h2>
           <p>{product.description || 'Sin descripcion disponible.'}</p>
 
-          <div className={styles.priceRow}>
-            <span className={styles.price}>${product.price.toLocaleString()}</span>
-            {hasOffer && oldPrice ? (
-              <span className={styles.oldPrice}>
-                ${oldPrice.toLocaleString()}
-              </span>
-            ) : null}
-          </div>
-
           <button
             type="button"
             className={styles.primary}
-            onClick={() => onAddToCart(product)}
+            onClick={() => onQuote(product)}
           >
-            Agregar al carrito
+            <MessageCircle size={20} />
+            Cotizar por WhatsApp
           </button>
         </div>
       </div>

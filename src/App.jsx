@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-
 import { motion, AnimatePresence } from 'motion/react';
-import Cart from './components/Cart.jsx';
 import Footer from './components/Footer.jsx';
 import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
@@ -10,7 +8,6 @@ import ProductCatalog from './components/ProductCatalog.jsx';
 import InfoSection from './components/InfoSection.jsx';
 import ProductModal from './components/ProductModal.jsx';
 import WhatsAppButton from './components/WhatsAppButton.jsx';
-import Toast from './components/Toast.jsx';
 import styles from './App.module.css';
 
 export default function App() {
@@ -19,20 +16,9 @@ export default function App() {
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState(null);
-  const [cart, setCart] = useState(() => {
-    try {
-      const savedCart = localStorage.getItem('cart');
-      return savedCart ? JSON.parse(savedCart) : [];
-    } catch (error) {
-      console.error('Error parsing cart from localStorage:', error);
-      return [];
-    }
-  });
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
-  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -49,22 +35,13 @@ export default function App() {
         const data = await response.json();
         const mapped = data.map((item) => {
           const normalizedCategory = normalizeCategory(item.categoria || '');
-          const price = Number.isFinite(item.precio) ? item.precio : 0;
-          const discountPercent = Number(item.porcentaje_oferta || 0);
-          const isOffer = Boolean(item.en_oferta) && discountPercent > 0;
-          const originalPrice =
-            isOffer && discountPercent < 100 && price > 0
-              ? Math.round(price / (1 - discountPercent / 100))
-              : undefined;
-
           return {
             id: item.sku || String(item.id_catalogo),
             name: item.nombre || 'Producto sin nombre',
             description: item.descripcion || '',
-            price,
-            originalPrice,
             category: normalizedCategory || baseCategories[0],
             image: item.imagen || '/logonn-modified.png',
+            images: item.imagenes || [],
             featured: Boolean(item.destacado),
             tamano_imagen: item.tamano_imagen || 'default',
             raw: item,
@@ -93,16 +70,6 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
-
-  useEffect(() => {
-    if (isCartOpen) {
-      setToast(null);
-    }
-  }, [isCartOpen]);
-
   const categories = useMemo(() => {
     const cats = new Set(products.map((p) => p.category));
     cats.add('semáforos');
@@ -129,49 +96,18 @@ export default function App() {
     });
   }, [products, searchQuery, activeCategory]);
 
-  const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const cartTotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
-  const offerProducts = useMemo(
-    () => products.filter((p) => p.originalPrice && p.originalPrice > p.price),
-    [products]
-  );
-
   const featuredProductsList = useMemo(
     () => products.filter((p) => p.featured),
     [products]
   );
 
-  const addToCart = (product) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-    setToast({ id: Date.now(), productName: product.name });
-  };
-
-  const removeFromCart = (productId) => {
-    setCart((prev) => prev.filter((item) => item.id !== productId));
-  };
-
-  const updateQuantity = (productId, delta) => {
-    setCart((prev) =>
-      prev.map((item) => {
-        if (item.id === productId) {
-          const newQty = Math.max(0, item.quantity + delta);
-          return { ...item, quantity: newQty };
-        }
-        return item;
-      })
-        .filter((item) => item.quantity > 0)
-    );
+  const handleQuoteWhatsApp = (product) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.farosledclean.com.ar';
+    const message = `Hola! Quiero cotizar este producto:\n\n${product.name}\nSKU: ${product.id}\nLink: ${origin}`;
+    const encodedMessage = encodeURIComponent(message);
+    const envPhone = import.meta.env.VITE_WHATSAPP_PHONE;
+    const phoneNumber = envPhone ? envPhone.trim() : '5491100000000';
+    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
   };
 
   return (
@@ -179,26 +115,11 @@ export default function App() {
       <Navbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        onCartOpen={setIsCartOpen}
-        cartCount={cartCount}
       />
 
       <Hero />
 
       <InfoSection />
-
-      <ProductCarousel
-        id="offers-section"
-        title="Ofertas imperdibles"
-        subtitle="Precios exclusivos web"
-        icon="🔥"
-        themeColor="#dc2626"
-        products={offerProducts}
-        type="offer"
-        onProductClick={setSelectedProduct}
-        onAddToCart={addToCart}
-        isPaused={!!selectedProduct}
-      />
 
       <ProductCarousel
         title="Productos destacados"
@@ -207,7 +128,7 @@ export default function App() {
         products={featuredProductsList}
         type="featured"
         onProductClick={setSelectedProduct}
-        onAddToCart={addToCart}
+        onQuote={handleQuoteWhatsApp}
         isPaused={!!selectedProduct}
       />
 
@@ -221,32 +142,20 @@ export default function App() {
         setActiveCategory={setActiveCategory}
         categories={categories}
         onProductClick={setSelectedProduct}
-        onAddToCart={addToCart}
+        onQuote={handleQuoteWhatsApp}
       />
 
       <Footer />
-
-      <Cart
-        isCartOpen={isCartOpen}
-        setIsCartOpen={setIsCartOpen}
-        cart={cart}
-        cartCount={cartCount}
-        cartTotal={cartTotal}
-        removeFromCart={removeFromCart}
-        updateQuantity={updateQuantity}
-      />
 
       {selectedProduct ? (
         <ProductModal
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
-          onAddToCart={addToCart}
+          onQuote={handleQuoteWhatsApp}
         />
       ) : null}
 
-      <WhatsAppButton isCartOpen={isCartOpen} />
-
-      <Toast toast={toast} onClose={() => setToast(null)} />
+      <WhatsAppButton />
     </div>
   );
 }

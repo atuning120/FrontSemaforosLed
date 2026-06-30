@@ -12,70 +12,11 @@ import {
 import WhatsAppModal from './WhatsAppModal.jsx';
 import styles from './Hero.module.css';
 
-const HERO_SLIDES = [
-  {
-    id: 1,
-    badge: "Eficiencia que Ilumina tu Vida",
-    badgeClass: styles.badgeCyan,
-    titlePrimary: "TECNOLOGÍA LED",
-    titleSecondary: "Y",
-    titleHighlight: "SUMINISTROS",
-    description: "Soluciones de iluminación eficientes y sustentables, materiales de alto rendimiento y la mejor asesoría técnica para tus proyectos.",
-    image: "https://res.cloudinary.com/dse8u2afw/image/upload/v1779914689/image_ec1c48a8_h5uty2.png",
-    ctaText: "VER PRODUCTOS",
-    ctaAction: "catalog",
-    whatsappBadge: true,
-  },
-  {
-    id: 2,
-    badge: "Catálogo Digital",
-    badgeClass: styles.badgeEmerald,
-    titlePrimary: "CONOCÉ NUESTRA",
-    titleSecondary: "TIENDA",
-    titleHighlight: "ONLINE",
-    description: "Explorá todo nuestro catálogo de productos desde la comodidad de tu casa. Realizá tus compras de forma rápida, segura y con la mejor atención.",
-    detailInfo: {
-      address: "Envíos y retiros disponibles",
-      hours: "Atención web 24/7",
-    },
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop",
-    ctaText: "VER CATÁLOGO",
-    ctaAction: "catalog",
-    whatsappBadge: false,
-  },
-  {
-    id: 3,
-    badge: "Envíos a toda Argentina",
-    badgeClass: styles.badgeAmber,
-    titlePrimary: "HACEMOS ENVÍOS A",
-    titleSecondary: "TODO EL",
-    titleHighlight: "PAÍS",
-    description: "Despachamos tus pedidos de forma rápida y segura a cualquier punto de la Argentina. Comprá a través de la web y recibilo en la puerta de tu casa o sucursal de correo más cercana.",
-    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1600&auto=format&fit=crop",
-    ctaText: "VER OFERTAS",
-    ctaAction: "offers",
-    whatsappBadge: true,
-  },
-  {
-    id: 4,
-    badge: "Mercado Pago & Transferencia",
-    badgeClass: styles.badgeIndigo,
-    titlePrimary: "PAGÁ DE LA FORMA",
-    titleSecondary: "MÁS SIMPLE Y",
-    titleHighlight: "CONVENIENTE",
-    description: "Realizá tus compras abonando de manera 100% segura mediante Mercado Pago (todas las tarjetas de crédito y débito) o transferencia bancaria directa.",
-    detailInfo: {
-      address: "Tarjetas de crédito, débito y dinero en cuenta",
-      hours: "Transferencias directas inmediatas en pesos",
-    },
-    image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=1600&auto=format&fit=crop",
-    ctaText: "VER PRODUCTOS",
-    ctaAction: "catalog",
-    whatsappBadge: true,
-  }
-];
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
 
 export default function Hero() {
+  const [heroSlides, setHeroSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isHoveringCarousel, setIsHoveringCarousel] = useState(false);
@@ -86,13 +27,15 @@ export default function Hero() {
   const minSwipeDistance = 50;
 
   const nextSlide = () => {
+    if (heroSlides.length === 0) return;
     setDirection(1);
-    setCurrentSlide(prev => (prev + 1) % HERO_SLIDES.length);
+    setCurrentSlide(prev => (prev + 1) % heroSlides.length);
   };
 
   const prevSlide = () => {
+    if (heroSlides.length === 0) return;
     setDirection(-1);
-    setCurrentSlide(prev => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+    setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
   const goToSlide = (idx) => {
@@ -125,13 +68,28 @@ export default function Hero() {
   };
 
   useEffect(() => {
-    if (isHoveringCarousel) return;
+    const fetchScreens = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/hero`);
+        if (response.ok) {
+          const data = await response.json();
+          setHeroSlides(data);
+        }
+      } catch (error) {
+        console.error('Error fetching hero screens:', error);
+      }
+    };
+    fetchScreens();
+  }, []);
+
+  useEffect(() => {
+    if (isHoveringCarousel || heroSlides.length === 0) return;
     const interval = setInterval(() => {
       setDirection(1);
-      setCurrentSlide(prev => (prev + 1) % HERO_SLIDES.length);
+      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [isHoveringCarousel, currentSlide]);
+  }, [isHoveringCarousel, currentSlide, heroSlides.length]);
 
   const handleCtaAction = (action) => {
     let el;
@@ -178,11 +136,11 @@ export default function Hero() {
         >
           <div className={styles.carouselWrapper}>
             <AnimatePresence mode="wait" custom={direction}>
-              {HERO_SLIDES.map((slide, idx) => {
+              {heroSlides.map((slide, idx) => {
                 if (idx !== currentSlide) return null;
                 return (
                   <motion.div
-                    key={slide.id}
+                    key={slide._id || idx}
                     custom={direction}
                     variants={{
                       enter: (dir) => ({ opacity: 0, x: dir > 0 ? 50 : -50 }),
@@ -203,7 +161,7 @@ export default function Hero() {
                     </div>
 
                     <div className={styles.slideContent}>
-                      <div className={`${styles.badge} ${slide.badgeClass}`}>
+                      <div className={`${styles.badge} ${styles[slide.badgeClass] || styles.badgeCyan}`}>
                         <span className={styles.badgeDot}></span>
                         {slide.badge}
                       </div>
@@ -220,27 +178,27 @@ export default function Hero() {
                       {slide.detailInfo && (
                         <div className={styles.infoBox}>
                           <div className={styles.infoItem}>
-                            {slide.id === 4 ? (
+                            {slide.order === 4 ? (
                               <CreditCard className={styles.infoIconIndigo} />
                             ) : (
                               <MapPin className={styles.infoIconAccent} />
                             )}
                             <div>
                               <p className={styles.infoLabel}>
-                                {slide.id === 4 ? "MERCADO PAGO" : "DIRECCIÓN"}
+                                {slide.order === 4 ? "MERCADO PAGO" : "DIRECCIÓN"}
                               </p>
                               <p className={styles.infoValue}>{slide.detailInfo.address}</p>
                             </div>
                           </div>
                           <div className={`${styles.infoItem} ${styles.infoItemBorder}`}>
-                            {slide.id === 4 ? (
+                            {slide.order === 4 ? (
                               <Building className={styles.infoIconIndigo} />
                             ) : (
                               <Clock className={styles.infoIconAccent} />
                             )}
                             <div>
                               <p className={styles.infoLabel}>
-                                {slide.id === 4 ? "TRANSFERENCIAS" : "HORARIOS"}
+                                {slide.order === 4 ? "TRANSFERENCIAS" : "HORARIOS"}
                               </p>
                               <p className={styles.infoValue}>{slide.detailInfo.hours}</p>
                             </div>
@@ -288,7 +246,7 @@ export default function Hero() {
             </button>
 
             <div className={styles.indicators}>
-              {HERO_SLIDES.map((_, idx) => (
+              {heroSlides.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => goToSlide(idx)}

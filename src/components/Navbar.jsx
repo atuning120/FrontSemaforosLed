@@ -1,8 +1,8 @@
-import { ShoppingCart, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import Logo from './Logo.jsx';
 import styles from './Navbar.module.css';
 
-export default function Navbar({ searchQuery, onSearchChange, onCartOpen, cartCount }) {
+export default function Navbar({ searchQuery, onSearchChange }) {
   return (
     <nav className={styles.nav}>
       <div>
@@ -18,16 +18,6 @@ export default function Navbar({ searchQuery, onSearchChange, onCartOpen, cartCo
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
         />
-      </div>
-
-      <div className={styles.navActions}>
-        <button
-          onClick={() => onCartOpen(true)}
-          className={styles.cartButton}
-        >
-          <ShoppingCart size={28} />
-          {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
-        </button>
       </div>
     </nav>
   );

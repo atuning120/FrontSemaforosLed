@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from 'react';
-import { ShoppingCart } from 'lucide-react';
 import ProductCard from './ProductCard.jsx';
 import styles from './ProductCarousel.module.css';
 
@@ -12,7 +11,7 @@ export default function ProductCarousel({
   products,
   type,
   onProductClick,
-  onAddToCart,
+  onQuote,
   isPaused,
 }) {
   const carouselRef = useRef(null);
@@ -180,27 +179,16 @@ export default function ProductCarousel({
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
-              {duplicatedProducts.map((product, index) => {
-                const hasOffer = type === 'offer';
-                let discount = null;
-                
-                if (hasOffer && product.originalPrice) {
-                  discount = Math.round(
-                    ((product.originalPrice - product.price) / product.originalPrice) * 100
-                  );
-                }
-
-                return (
-                  <ProductCard
-                    key={`${type}-${product.id}-${index}`}
-                    product={product}
-                    type={type}
-                    isCarousel={true}
-                    onProductClick={onProductClick}
-                    onAddToCart={onAddToCart}
-                  />
-                );
-              })}
+              {duplicatedProducts.map((product, index) => (
+                <ProductCard
+                  key={`${type}-${product.id}-${index}`}
+                  product={product}
+                  type={type}
+                  isCarousel={true}
+                  onProductClick={onProductClick}
+                  onQuote={onQuote}
+                />
+              ))}
             </div>
           </div>
       </div>

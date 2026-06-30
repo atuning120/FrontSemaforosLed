@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash, Star } from 'lucide-react';
 import Filters from '../Filters.jsx';
 import styles from './AdminProducts.module.css';
 
@@ -9,12 +9,10 @@ const emptyForm = {
   sku: '',
   nombre: '',
   descripcion: '',
-  precio: '',
   categoria: BASE_CATEGORIES[0],
   moneda: 'ARS',
   imagen: '',
-  en_oferta: false,
-  porcentaje_oferta: 0,
+  imagenes: [],
   destacado: false,
   id_catalogo: '',
   tamano_imagen: 'default',
@@ -66,6 +64,22 @@ export default function AdminProducts({ baseUrl, token }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('todos');
   const [dragActive, setDragActive] = useState(false);
+  const [draggedImgIdx, setDraggedImgIdx] = useState(null);
+  const [urlInputEdit, setUrlInputEdit] = useState('');
+  const [urlInputCreate, setUrlInputCreate] = useState('');
+  const [selectedImageIdxEdit, setSelectedImageIdxEdit] = useState(null);
+  const [selectedImageIdxCreate, setSelectedImageIdxCreate] = useState(null);
+  const [activeMobileCard, setActiveMobileCard] = useState(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(`.${styles.productCard}`)) {
+        setActiveMobileCard(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const headers = useMemo(
     () => ({
@@ -113,21 +127,17 @@ export default function AdminProducts({ baseUrl, token }) {
   }, [isCreateOpen, editingSku, deleteTarget]);
 
   const toPayload = (form) => {
-    const price = Number(form.precio);
-    const porcentaje = Number(form.porcentaje_oferta);
     const idCatalogo = form.id_catalogo === '' ? undefined : Number(form.id_catalogo);
 
     return {
       sku: form.sku.trim(),
       nombre: form.nombre.trim(),
       descripcion: form.descripcion.trim(),
-      precio: Number.isFinite(price) ? price : 0,
       categoria: form.categoria,
       moneda: form.moneda.trim() || 'ARS',
       imagen: form.imagen.trim(),
-      en_oferta: Boolean(form.en_oferta),
+      imagenes: form.imagenes || [],
       destacado: Boolean(form.destacado),
-      porcentaje_oferta: form.en_oferta && Number.isFinite(porcentaje) ? porcentaje : 0,
       id_catalogo: idCatalogo,
       tamano_imagen: form.tamano_imagen || 'default',
     };
@@ -180,6 +190,8 @@ export default function AdminProducts({ baseUrl, token }) {
 
   const openCreate = () => {
     resetNotice();
+    setSelectedImageIdxCreate(null);
+    setSelectedImageIdxEdit(null);
     const nextCatalogId = getNextCatalogId(products);
     setCreateForm((prev) => ({
       ...emptyForm,
@@ -191,22 +203,24 @@ export default function AdminProducts({ baseUrl, token }) {
   };
 
   const closeCreate = () => {
+    setSelectedImageIdxCreate(null);
+    setSelectedImageIdxEdit(null);
     setIsCreateOpen(false);
   };
 
   const startEdit = (product) => {
     resetNotice();
+    setSelectedImageIdxEdit(null);
+    setSelectedImageIdxCreate(null);
     setEditingSku(product.sku);
     setEditForm({
       sku: product.sku || '',
       nombre: product.nombre || '',
       descripcion: product.descripcion || '',
-      precio: product.precio ?? '',
       categoria: product.categoria || BASE_CATEGORIES[0],
       moneda: product.moneda || 'ARS',
       imagen: product.imagen || '',
-      en_oferta: Boolean(product.en_oferta),
-      porcentaje_oferta: product.porcentaje_oferta ?? 0,
+      imagenes: product.imagenes || [],
       destacado: Boolean(product.destacado),
       id_catalogo: product.id_catalogo ?? '',
       tamano_imagen: product.tamano_imagen || 'default',
@@ -215,6 +229,8 @@ export default function AdminProducts({ baseUrl, token }) {
   };
 
   const cancelEdit = () => {
+    setSelectedImageIdxEdit(null);
+    setSelectedImageIdxCreate(null);
     setEditingSku('');
     setEditForm(emptyForm);
   };
@@ -250,6 +266,8 @@ export default function AdminProducts({ baseUrl, token }) {
   };
 
   const cancelDelete = () => {
+    setSelectedImageIdxEdit(null);
+    setSelectedImageIdxCreate(null);
     setDeleteTarget(null);
   };
 
@@ -294,64 +312,65 @@ export default function AdminProducts({ baseUrl, token }) {
     e.stopPropagation();
   };
 
-  const handleDrop = (e, isEditForm) => {
+  const handleDrop = (e, isEditForm, replaceIdx = null) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const pseudoEvent = { target: { files: e.dataTransfer.files } };
-      handleImageUpload(pseudoEvent, isEditForm);
+      handleImageUpload(pseudoEvent, isEditForm, replaceIdx);
     }
   };
 
-  const handleImageUpload = async (event, isEditForm) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  const handleImageUpload = async (event, isEditForm, replaceIdx = null) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-    const formData = new FormData();
-    formData.append('image', file);
+    setNotice('Subiendo imagen(es)...');
 
     try {
-      setNotice('Subiendo imagen...');
-      const response = await fetch(`${baseUrl}/api/admin/upload`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al subir imagen');
+      const urls = [];
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append('image', files[i]);
+
+        const response = await fetch(`${baseUrl}/api/admin/upload`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          body: formData
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Error al subir imagen');
+        }
+        urls.push(data.imageUrl.startsWith('/') ? `${baseUrl}${data.imageUrl}` : data.imageUrl);
       }
-      const newImageUrl = data.imageUrl.startsWith('/') ? `${baseUrl}${data.imageUrl}` : data.imageUrl;
       
+      const updateFn = (prev) => {
+        const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : (prev.imagen ? [prev.imagen] : []);
+        let newImagenes = [...currentImages];
+        
+        if (replaceIdx !== null && replaceIdx >= 0 && replaceIdx < newImagenes.length) {
+          newImagenes.splice(replaceIdx, 1, ...urls);
+        } else {
+          newImagenes = [...newImagenes, ...urls];
+        }
+        
+        return { ...prev, imagen: newImagenes[0] || '', imagenes: newImagenes };
+      };
+
       if (isEditForm) {
-        setEditForm((prev) => ({ ...prev, imagen: newImageUrl }));
+        setEditForm(updateFn);
       } else {
-        setCreateForm((prev) => ({ ...prev, imagen: newImageUrl }));
+        setCreateForm(updateFn);
       }
-      setNotice('Imagen subida correctamente.');
+      setNotice('Imagen(es) subida(s) correctamente.');
     } catch (err) {
-      setNotice(err.message || 'Error al subir imagen');
+      setNotice(err.message || 'Error al subir imagen(es)');
     }
   };
-
-  const editPercentage = Number(editForm.porcentaje_oferta || 0);
-  const editHasOffer = Boolean(editForm.en_oferta) && editPercentage > 0;
-  const editPrice = Number(editForm.precio);
-  const editOldPrice =
-    editHasOffer && Number.isFinite(editPrice) && editPrice > 0
-      ? Math.round(editPrice / (1 - editPercentage / 100))
-      : null;
-
-  const createPercentage = Number(createForm.porcentaje_oferta || 0);
-  const createHasOffer = Boolean(createForm.en_oferta) && createPercentage > 0;
-  const createPrice = Number(createForm.precio);
-  const createOldPrice =
-    createHasOffer && Number.isFinite(createPrice) && createPrice > 0
-      ? Math.round(createPrice / (1 - createPercentage / 100))
-      : null;
 
   const getMediaClass = (tamano) => {
     let cls = styles.productMedia;
@@ -453,14 +472,18 @@ export default function AdminProducts({ baseUrl, token }) {
 
         <div className={styles.productsGrid}>
           {paginatedProducts.map((product) => {
-            const percentage = Number(product.porcentaje_oferta || 0);
-            const hasOffer = Boolean(product.en_oferta) && percentage > 0;
-            const oldPrice = hasOffer
-              ? Math.round(product.precio / (1 - percentage / 100))
-              : null;
-
             return (
-              <div key={product.sku} className={styles.productCard}>
+              <div 
+                key={product.sku} 
+                className={`${styles.productCard} ${activeMobileCard === product.sku ? styles.activeMobileCard : ''}`}
+                onClick={(e) => {
+                  if (window.innerWidth <= 768) {
+                    if (!e.target.closest(`.${styles.overlayBtn}`)) {
+                      setActiveMobileCard(prev => prev === product.sku ? null : product.sku);
+                    }
+                  }
+                }}
+              >
                 <div className={getMediaClass(product.tamano_imagen)}>
                   {product.imagen?.trim() ? (
                     <img
@@ -471,18 +494,13 @@ export default function AdminProducts({ baseUrl, token }) {
                   ) : (
                     <div className={styles.noImage}>No hay imagen</div>
                   )}
-                  <div className={styles.productBadges}>
-                    {hasOffer && (
-                      <span className={styles.badgeOffer}>
-                        Oferta {percentage}%
-                      </span>
-                    )}
-                    {product.destacado && (
+                  {product.destacado && (
+                    <div className={styles.productBadges}>
                       <span className={styles.badgeFeatured}>
                         Destacado
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   
                   <div className={styles.adminOverlay}>
                     <button onClick={() => startEdit(product)} className={styles.overlayBtn}>
@@ -504,16 +522,7 @@ export default function AdminProducts({ baseUrl, token }) {
                     {product.descripcion?.length > 80 ? '...' : ''}
                   </p>
                   
-                  <div className={styles.productActions}>
-                    <div className={styles.priceStack}>
-                      <span className={styles.productPrice}>${product.precio?.toLocaleString('es-AR')}</span>
-                      {hasOffer && oldPrice && (
-                        <span className={styles.oldPrice}>
-                          ${oldPrice.toLocaleString('es-AR')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  <div className={styles.productActions} />
                 </div>
               </div>
             );
@@ -599,18 +608,13 @@ export default function AdminProducts({ baseUrl, token }) {
                     ) : (
                       <div className={styles.noImage}>No hay imagen</div>
                     )}
-                    <div className={styles.productBadges}>
-                      {editHasOffer && (
-                        <span className={styles.badgeOffer}>
-                          Oferta {editPercentage}%
-                        </span>
-                      )}
-                      {editForm.destacado && (
+                    {editForm.destacado && (
+                      <div className={styles.productBadges}>
                         <span className={styles.badgeFeatured}>
                           Destacado
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className={styles.productContent}>
@@ -629,20 +633,70 @@ export default function AdminProducts({ baseUrl, token }) {
                       {editForm.descripcion?.length > 90 ? '...' : ''}
                     </p>
 
-                    <div className={styles.productActions}>
-                      <div className={styles.priceStack}>
-                        <span className={styles.productPrice}>
-                          ${Number(editForm.precio || 0).toLocaleString('es-AR')}
-                        </span>
-                        {editHasOffer && editOldPrice && (
-                          <span className={styles.oldPrice}>
-                            ${editOldPrice.toLocaleString('es-AR')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                    <div className={styles.productActions} />
+
                   </div>
                 </div>
+                
+                                                {/* INICIO GALERIA */}
+                {(editForm.imagenes?.length > 0 || editForm.imagen) && (
+                  <div className={styles.galleryContainer}>
+                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Galería de imágenes</p>
+                    <div className={styles.galleryList}>
+                      {(editForm.imagenes?.length > 0 ? editForm.imagenes : [editForm.imagen]).filter(img => img && img.trim() !== '').map((img, idx) => {
+                        const isMain = img === editForm.imagen;
+                        const isSelected = selectedImageIdxEdit === idx;
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`${styles.galleryItem} ${isMain ? styles.galleryItemMain : ''} ${isSelected ? styles.galleryItemSelected : ''}`}
+                            draggable={true}
+                            onClick={() => {
+                              if (selectedImageIdxEdit === idx) {
+                                setSelectedImageIdxEdit(null);
+                              } else {
+                                setSelectedImageIdxEdit(idx);
+                              }
+                            }}
+                            onDragStart={(e) => {
+                              setDraggedImgIdx(idx);
+                              e.dataTransfer.effectAllowed = 'move';
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = 'move';
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              if (draggedImgIdx === null || draggedImgIdx === idx) return;
+                              setEditForm(prev => {
+                                const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen];
+                                const newImages = [...currentImages];
+                                const draggedImage = newImages.splice(draggedImgIdx, 1)[0];
+                                newImages.splice(idx, 0, draggedImage);
+                                return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                              });
+                              setDraggedImgIdx(null);
+                              
+                              if (selectedImageIdxEdit === draggedImgIdx) {
+                                setSelectedImageIdxEdit(idx);
+                              } else if (selectedImageIdxEdit !== null) {
+                                if (draggedImgIdx < selectedImageIdxEdit && idx >= selectedImageIdxEdit) {
+                                  setSelectedImageIdxEdit(selectedImageIdxEdit - 1);
+                                } else if (draggedImgIdx > selectedImageIdxEdit && idx <= selectedImageIdxEdit) {
+                                  setSelectedImageIdxEdit(selectedImageIdxEdit + 1);
+                                }
+                              }
+                            }}
+                          >
+                            <img src={img} alt="Thumb" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {/* FIN GALERIA */}
               </div>
 
               <div className={styles.modalFormArea}>
@@ -698,18 +752,6 @@ export default function AdminProducts({ baseUrl, token }) {
                   </label>
 
                   <label className={styles.label}>
-                    Precio
-                    <input
-                      type="number"
-                      value={editForm.precio}
-                      onChange={(event) =>
-                        setEditForm((prev) => ({ ...prev, precio: event.target.value }))
-                      }
-                      className={styles.input}
-                    />
-                  </label>
-                  
-                  <label className={styles.label}>
                     Moneda
                     <input
                       value={editForm.moneda}
@@ -736,56 +778,26 @@ export default function AdminProducts({ baseUrl, token }) {
                   </label>
 
                   <div className={styles.checkboxGroup}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <label className={styles.checkbox} style={{ margin: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={editForm.en_oferta}
-                          onChange={(event) =>
-                            setEditForm((prev) => ({
-                              ...prev,
-                              en_oferta: event.target.checked,
-                            }))
-                          }
-                        />
-                        En oferta
-                      </label>
-                      <label className={styles.checkbox} style={{ margin: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={editForm.destacado}
-                          onChange={(event) =>
-                            setEditForm((prev) => ({
-                              ...prev,
-                              destacado: event.target.checked,
-                            }))
-                          }
-                        />
-                        Destacado
-                      </label>
-                    </div>
-
-                    <label className={styles.label} style={{ marginLeft: 'auto', opacity: editForm.en_oferta ? 1 : 0.5 }}>
-                      Porcentaje oferta (%)
+                    <label className={styles.checkbox} style={{ margin: 0 }}>
                       <input
-                        type="number"
-                        value={editForm.porcentaje_oferta}
+                        type="checkbox"
+                        checked={editForm.destacado}
                         onChange={(event) =>
                           setEditForm((prev) => ({
                             ...prev,
-                            porcentaje_oferta: event.target.value,
+                            destacado: event.target.checked,
                           }))
                         }
-                        className={styles.input}
-                        disabled={!editForm.en_oferta}
-                        style={{ width: '140px' }}
                       />
+                      Destacado
                     </label>
                   </div>
 
                   <div className={styles.label} style={{ gridColumn: '1 / -1' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Imagen</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <span style={{ fontWeight: 600, color: selectedImageIdxEdit !== null ? '#4da6ff' : 'inherit' }}>
+                        {selectedImageIdxEdit !== null ? 'Modificar imagen seleccionada' : 'Agregar nueva imagen'}
+                      </span>
                       <div className={styles.switchContainer}>
                         <button
                           type="button"
@@ -804,44 +816,161 @@ export default function AdminProducts({ baseUrl, token }) {
                       </div>
                     </div>
 
+                    {selectedImageIdxEdit !== null && (
+                      <div style={{ marginBottom: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {(() => {
+                          const currentImages = editForm.imagenes?.length > 0 ? editForm.imagenes : [editForm.imagen].filter(Boolean);
+                          const imgUrl = currentImages[selectedImageIdxEdit];
+                          return imgUrl ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '0.75rem' }}>
+                              <img src={imgUrl} alt="Selected" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '0.5rem' }} />
+                              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', wordBreak: 'break-all', flex: 1 }}>
+                                {imgUrl.startsWith('data:') ? 'Imagen en memoria (Base64)' : imgUrl}
+                              </span>
+                            </div>
+                          ) : null;
+                        })()}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                          <button
+                            type="button"
+                            className={styles.secondary}
+                            onClick={() => {
+                              setEditForm(prev => {
+                                const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen].filter(Boolean);
+                                const newImages = [...currentImages];
+                                const img = newImages.splice(selectedImageIdxEdit, 1)[0];
+                                newImages.unshift(img);
+                                return { ...prev, imagenes: newImages, imagen: img };
+                              });
+                              setSelectedImageIdxEdit(0);
+                            }}
+                            style={{ padding: '0.5rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                            disabled={selectedImageIdxEdit === 0}
+                          >
+                            Fijar portada
+                          </button>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
+                            <button
+                              type="button"
+                              className={styles.secondary}
+                              onClick={() => {
+                                setEditForm(prev => {
+                                  const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen].filter(Boolean);
+                                  const newImages = [...currentImages];
+                                  const img = newImages.splice(selectedImageIdxEdit, 1)[0];
+                                  newImages.splice(selectedImageIdxEdit - 1, 0, img);
+                                  return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                                });
+                                setSelectedImageIdxEdit(selectedImageIdxEdit - 1);
+                              }}
+                              style={{ padding: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                              disabled={selectedImageIdxEdit === 0}
+                              title="Mover a la izquierda"
+                            >
+                              <ChevronLeft size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.secondary}
+                              onClick={() => {
+                                setEditForm(prev => {
+                                  const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen].filter(Boolean);
+                                  const newImages = [...currentImages];
+                                  const img = newImages.splice(selectedImageIdxEdit, 1)[0];
+                                  newImages.splice(selectedImageIdxEdit + 1, 0, img);
+                                  return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                                });
+                                setSelectedImageIdxEdit(selectedImageIdxEdit + 1);
+                              }}
+                              style={{ padding: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                              disabled={selectedImageIdxEdit === (editForm.imagenes?.length > 0 ? editForm.imagenes.length : 1) - 1}
+                              title="Mover a la derecha"
+                            >
+                              <ChevronRight size={16} />
+                            </button>
+                          </div>
+                          
+                          <button
+                            type="button"
+                            className={styles.danger}
+                            onClick={() => {
+                              setEditForm(prev => {
+                                const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen].filter(Boolean);
+                                const newImages = currentImages.filter((_, i) => i !== selectedImageIdxEdit);
+                                return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                              });
+                              setSelectedImageIdxEdit(null);
+                            }}
+                            style={{ gridColumn: '1 / -1', padding: '0.5rem', fontSize: '0.85rem' }}
+                          >
+                            Eliminar imagen
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     {editForm.upload_mode === 'url' ? (
-                      <input
-                        value={editForm.imagen}
-                        onChange={(event) =>
-                          setEditForm((prev) => ({ ...prev, imagen: formatImageUrl(event.target.value) }))
-                        }
-                        className={styles.input}
-                        placeholder="https://ejemplo.com/imagen.jpg"
-                      />
+                      <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                        <input
+                          value={urlInputEdit}
+                          onChange={(e) => setUrlInputEdit(e.target.value)}
+                          className={styles.input}
+                          placeholder="https://ejemplo.com/imagen.jpg"
+                        />
+                        <button 
+                          type="button" 
+                          className={selectedImageIdxEdit !== null ? styles.primary : styles.secondary}
+                          onClick={() => {
+                            const url = urlInputEdit.trim();
+                            if (!url) return;
+                            const formatted = formatImageUrl(url);
+                            setEditForm((prev) => {
+                              const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : (prev.imagen ? [prev.imagen] : []);
+                              let newImagenes = [...currentImages];
+                              if (selectedImageIdxEdit !== null && selectedImageIdxEdit >= 0 && selectedImageIdxEdit < newImagenes.length) {
+                                newImagenes.splice(selectedImageIdxEdit, 1, formatted);
+                              } else {
+                                newImagenes.push(formatted);
+                              }
+                              return { ...prev, imagenes: newImagenes, imagen: newImagenes[0] || '' };
+                            });
+                            setUrlInputEdit('');
+                            if (selectedImageIdxEdit !== null) setSelectedImageIdxEdit(null);
+                          }}
+                        >
+                          {selectedImageIdxEdit !== null ? 'Reemplazar por URL' : 'Agregar por URL'}
+                        </button>
+                      </div>
                     ) : (
                       <div
                         className={`${styles.dropzone} ${dragActive ? styles.dragActive : ''}`}
                         onDragEnter={handleDragEnter}
                         onDragLeave={handleDragLeave}
                         onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, true)}
+                        onDrop={(e) => handleDrop(e, true, selectedImageIdxEdit)}
                       >
-                        {editForm.imagen && editForm.upload_mode === 'upload' ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                            <img src={editForm.imagen} alt="Preview" style={{ height: '80px', borderRadius: '0.5rem', objectFit: 'contain' }} />
-                            <p style={{ margin: 0, fontWeight: 500 }}>Imagen lista</p>
-                            <label className={styles.secondary} style={{ cursor: 'pointer', margin: 0, display: 'inline-block' }}>
-                              Cambiar archivo
-                              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, true)} style={{ display: 'none' }} />
-                            </label>
-                          </div>
-                        ) : (
-                          <>
-                            <p>Arrastra tu imagen aquí o haz clic para subir</p>
-                            <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
-                              Formatos: JPG, PNG, WEBP, AVIF
-                            </p>
-                            <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
-                              Seleccionar archivo
-                              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, true)} style={{ display: 'none' }} />
-                            </label>
-                          </>
-                        )}
+                        <p>
+                          {selectedImageIdxEdit !== null 
+                            ? 'Arrastra una imagen aquí o haz clic para reemplazar' 
+                            : 'Arrastra tu(s) imagen(es) aquí o haz clic para subir'}
+                        </p>
+                        <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
+                          Formatos: JPG, PNG, WEBP, AVIF
+                        </p>
+                        <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
+                          Seleccionar archivo{selectedImageIdxEdit !== null ? '' : '(s)'}
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            multiple={selectedImageIdxEdit === null} 
+                            onChange={(e) => {
+                              handleImageUpload(e, true, selectedImageIdxEdit);
+                              if (selectedImageIdxEdit !== null) setSelectedImageIdxEdit(null);
+                            }} 
+                            style={{ display: 'none' }} 
+                          />
+                        </label>
                       </div>
                     )}
                   </div>
@@ -888,18 +1017,13 @@ export default function AdminProducts({ baseUrl, token }) {
                     ) : (
                       <div className={styles.noImage}>No hay imagen</div>
                     )}
-                    <div className={styles.productBadges}>
-                      {createHasOffer && (
-                        <span className={styles.badgeOffer}>
-                          Oferta {createPercentage}%
-                        </span>
-                      )}
-                      {createForm.destacado && (
+                    {createForm.destacado && (
+                      <div className={styles.productBadges}>
                         <span className={styles.badgeFeatured}>
                           Destacado
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className={styles.productContent}>
@@ -918,20 +1042,70 @@ export default function AdminProducts({ baseUrl, token }) {
                       {createForm.descripcion?.length > 90 ? '...' : ''}
                     </p>
 
-                    <div className={styles.productActions}>
-                      <div className={styles.priceStack}>
-                        <span className={styles.productPrice}>
-                          ${Number(createForm.precio || 0).toLocaleString('es-AR')}
-                        </span>
-                        {createHasOffer && createOldPrice && (
-                          <span className={styles.oldPrice}>
-                            ${createOldPrice.toLocaleString('es-AR')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                    <div className={styles.productActions} />
+
                   </div>
                 </div>
+                
+                {/* INICIO GALERIA */}
+                {(createForm.imagenes?.length > 0 || createForm.imagen) && (
+                  <div className={styles.galleryContainer}>
+                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Galería de imágenes</p>
+                    <div className={styles.galleryList}>
+                      {(createForm.imagenes?.length > 0 ? createForm.imagenes : [createForm.imagen]).filter(img => img && img.trim() !== '').map((img, idx) => {
+                        const isMain = img === createForm.imagen;
+                        const isSelected = selectedImageIdxCreate === idx;
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`${styles.galleryItem} ${isMain ? styles.galleryItemMain : ''} ${isSelected ? styles.galleryItemSelected : ''}`}
+                            draggable={true}
+                            onClick={() => {
+                              if (selectedImageIdxCreate === idx) {
+                                setSelectedImageIdxCreate(null);
+                              } else {
+                                setSelectedImageIdxCreate(idx);
+                              }
+                            }}
+                            onDragStart={(e) => {
+                              setDraggedImgIdx(idx);
+                              e.dataTransfer.effectAllowed = 'move';
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = 'move';
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              if (draggedImgIdx === null || draggedImgIdx === idx) return;
+                              setCreateForm(prev => {
+                                const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen];
+                                const newImages = [...currentImages];
+                                const draggedImage = newImages.splice(draggedImgIdx, 1)[0];
+                                newImages.splice(idx, 0, draggedImage);
+                                return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                              });
+                              setDraggedImgIdx(null);
+
+                              if (selectedImageIdxCreate === draggedImgIdx) {
+                                setSelectedImageIdxCreate(idx);
+                              } else if (selectedImageIdxCreate !== null) {
+                                if (draggedImgIdx < selectedImageIdxCreate && idx >= selectedImageIdxCreate) {
+                                  setSelectedImageIdxCreate(selectedImageIdxCreate - 1);
+                                } else if (draggedImgIdx > selectedImageIdxCreate && idx <= selectedImageIdxCreate) {
+                                  setSelectedImageIdxCreate(selectedImageIdxCreate + 1);
+                                }
+                              }
+                            }}
+                          >
+                            <img src={img} alt="Thumb" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {/* FIN GALERIA */}
               </div>
 
               <div className={styles.modalFormArea}>
@@ -1002,18 +1176,6 @@ export default function AdminProducts({ baseUrl, token }) {
                   </label>
 
                   <label className={styles.label}>
-                    Precio
-                    <input
-                      type="number"
-                      value={createForm.precio}
-                      onChange={(event) =>
-                        setCreateForm((prev) => ({ ...prev, precio: event.target.value }))
-                      }
-                      className={styles.input}
-                    />
-                  </label>
-
-                  <label className={styles.label}>
                     Moneda
                     <input
                       value={createForm.moneda}
@@ -1038,56 +1200,26 @@ export default function AdminProducts({ baseUrl, token }) {
                   </label>
 
                   <div className={styles.checkboxGroup}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <label className={styles.checkbox} style={{ margin: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={createForm.en_oferta}
-                          onChange={(event) =>
-                            setCreateForm((prev) => ({
-                              ...prev,
-                              en_oferta: event.target.checked,
-                            }))
-                          }
-                        />
-                        En oferta
-                      </label>
-                      <label className={styles.checkbox} style={{ margin: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={createForm.destacado}
-                          onChange={(event) =>
-                            setCreateForm((prev) => ({
-                              ...prev,
-                              destacado: event.target.checked,
-                            }))
-                          }
-                        />
-                        Destacado
-                      </label>
-                    </div>
-
-                    <label className={styles.label} style={{ marginLeft: 'auto', opacity: createForm.en_oferta ? 1 : 0.5 }}>
-                      Porcentaje oferta (%)
+                    <label className={styles.checkbox} style={{ margin: 0 }}>
                       <input
-                        type="number"
-                        value={createForm.porcentaje_oferta}
+                        type="checkbox"
+                        checked={createForm.destacado}
                         onChange={(event) =>
                           setCreateForm((prev) => ({
                             ...prev,
-                            porcentaje_oferta: event.target.value,
+                            destacado: event.target.checked,
                           }))
                         }
-                        className={styles.input}
-                        disabled={!createForm.en_oferta}
-                        style={{ width: '140px' }}
                       />
+                      Destacado
                     </label>
                   </div>
 
                   <div className={styles.label} style={{ gridColumn: '1 / -1' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Imagen</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <span style={{ fontWeight: 600, color: selectedImageIdxCreate !== null ? '#4da6ff' : 'inherit' }}>
+                        {selectedImageIdxCreate !== null ? 'Modificar imagen seleccionada' : 'Agregar nueva imagen'}
+                      </span>
                       <div className={styles.switchContainer}>
                         <button
                           type="button"
@@ -1106,44 +1238,161 @@ export default function AdminProducts({ baseUrl, token }) {
                       </div>
                     </div>
 
+                    {selectedImageIdxCreate !== null && (
+                      <div style={{ marginBottom: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {(() => {
+                          const currentImages = createForm.imagenes?.length > 0 ? createForm.imagenes : [createForm.imagen].filter(Boolean);
+                          const imgUrl = currentImages[selectedImageIdxCreate];
+                          return imgUrl ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '0.75rem' }}>
+                              <img src={imgUrl} alt="Selected" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '0.5rem' }} />
+                              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', wordBreak: 'break-all', flex: 1 }}>
+                                {imgUrl.startsWith('data:') ? 'Imagen en memoria (Base64)' : imgUrl}
+                              </span>
+                            </div>
+                          ) : null;
+                        })()}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                          <button
+                            type="button"
+                            className={styles.secondary}
+                            onClick={() => {
+                              setCreateForm(prev => {
+                                const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen].filter(Boolean);
+                                const newImages = [...currentImages];
+                                const img = newImages.splice(selectedImageIdxCreate, 1)[0];
+                                newImages.unshift(img);
+                                return { ...prev, imagenes: newImages, imagen: img };
+                              });
+                              setSelectedImageIdxCreate(0);
+                            }}
+                            style={{ padding: '0.5rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                            disabled={selectedImageIdxCreate === 0}
+                          >
+                            Fijar portada
+                          </button>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
+                            <button
+                              type="button"
+                              className={styles.secondary}
+                              onClick={() => {
+                                setCreateForm(prev => {
+                                  const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen].filter(Boolean);
+                                  const newImages = [...currentImages];
+                                  const img = newImages.splice(selectedImageIdxCreate, 1)[0];
+                                  newImages.splice(selectedImageIdxCreate - 1, 0, img);
+                                  return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                                });
+                                setSelectedImageIdxCreate(selectedImageIdxCreate - 1);
+                              }}
+                              style={{ padding: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                              disabled={selectedImageIdxCreate === 0}
+                              title="Mover a la izquierda"
+                            >
+                              <ChevronLeft size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.secondary}
+                              onClick={() => {
+                                setCreateForm(prev => {
+                                  const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen].filter(Boolean);
+                                  const newImages = [...currentImages];
+                                  const img = newImages.splice(selectedImageIdxCreate, 1)[0];
+                                  newImages.splice(selectedImageIdxCreate + 1, 0, img);
+                                  return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                                });
+                                setSelectedImageIdxCreate(selectedImageIdxCreate + 1);
+                              }}
+                              style={{ padding: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                              disabled={selectedImageIdxCreate === (createForm.imagenes?.length > 0 ? createForm.imagenes.length : 1) - 1}
+                              title="Mover a la derecha"
+                            >
+                              <ChevronRight size={16} />
+                            </button>
+                          </div>
+                          
+                          <button
+                            type="button"
+                            className={styles.danger}
+                            onClick={() => {
+                              setCreateForm(prev => {
+                                const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : [prev.imagen].filter(Boolean);
+                                const newImages = currentImages.filter((_, i) => i !== selectedImageIdxCreate);
+                                return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
+                              });
+                              setSelectedImageIdxCreate(null);
+                            }}
+                            style={{ gridColumn: '1 / -1', padding: '0.5rem', fontSize: '0.85rem' }}
+                          >
+                            Eliminar imagen
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     {createForm.upload_mode === 'url' ? (
-                      <input
-                        value={createForm.imagen}
-                        onChange={(event) =>
-                          setCreateForm((prev) => ({ ...prev, imagen: formatImageUrl(event.target.value) }))
-                        }
-                        className={styles.input}
-                        placeholder="https://ejemplo.com/imagen.jpg"
-                      />
+                      <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                        <input
+                          value={urlInputCreate}
+                          onChange={(e) => setUrlInputCreate(e.target.value)}
+                          className={styles.input}
+                          placeholder="https://ejemplo.com/imagen.jpg"
+                        />
+                        <button 
+                          type="button" 
+                          className={selectedImageIdxCreate !== null ? styles.primary : styles.secondary}
+                          onClick={() => {
+                            const url = urlInputCreate.trim();
+                            if (!url) return;
+                            const formatted = formatImageUrl(url);
+                            setCreateForm((prev) => {
+                              const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : (prev.imagen ? [prev.imagen] : []);
+                              let newImagenes = [...currentImages];
+                              if (selectedImageIdxCreate !== null && selectedImageIdxCreate >= 0 && selectedImageIdxCreate < newImagenes.length) {
+                                newImagenes.splice(selectedImageIdxCreate, 1, formatted);
+                              } else {
+                                newImagenes.push(formatted);
+                              }
+                              return { ...prev, imagenes: newImagenes, imagen: newImagenes[0] || '' };
+                            });
+                            setUrlInputCreate('');
+                            if (selectedImageIdxCreate !== null) setSelectedImageIdxCreate(null);
+                          }}
+                        >
+                          {selectedImageIdxCreate !== null ? 'Reemplazar por URL' : 'Agregar por URL'}
+                        </button>
+                      </div>
                     ) : (
                       <div
                         className={`${styles.dropzone} ${dragActive ? styles.dragActive : ''}`}
                         onDragEnter={handleDragEnter}
                         onDragLeave={handleDragLeave}
                         onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, false)}
+                        onDrop={(e) => handleDrop(e, false, selectedImageIdxCreate)}
                       >
-                        {createForm.imagen && createForm.upload_mode === 'upload' ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                            <img src={createForm.imagen} alt="Preview" style={{ height: '80px', borderRadius: '0.5rem', objectFit: 'contain' }} />
-                            <p style={{ margin: 0, fontWeight: 500 }}>Imagen lista</p>
-                            <label className={styles.secondary} style={{ cursor: 'pointer', margin: 0, display: 'inline-block' }}>
-                              Cambiar archivo
-                              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, false)} style={{ display: 'none' }} />
-                            </label>
-                          </div>
-                        ) : (
-                          <>
-                            <p>Arrastra tu imagen aquí o haz clic para subir</p>
-                            <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
-                              Formatos: JPG, PNG, WEBP, AVIF
-                            </p>
-                            <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
-                              Seleccionar archivo
-                              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, false)} style={{ display: 'none' }} />
-                            </label>
-                          </>
-                        )}
+                        <p>
+                          {selectedImageIdxCreate !== null 
+                            ? 'Arrastra una imagen aquí o haz clic para reemplazar' 
+                            : 'Arrastra tu(s) imagen(es) aquí o haz clic para subir'}
+                        </p>
+                        <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
+                          Formatos: JPG, PNG, WEBP, AVIF
+                        </p>
+                        <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
+                          Seleccionar archivo{selectedImageIdxCreate !== null ? '' : '(s)'}
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            multiple={selectedImageIdxCreate === null} 
+                            onChange={(e) => {
+                              handleImageUpload(e, false, selectedImageIdxCreate);
+                              if (selectedImageIdxCreate !== null) setSelectedImageIdxCreate(null);
+                            }} 
+                            style={{ display: 'none' }} 
+                          />
+                        </label>
                       </div>
                     )}
                   </div>
