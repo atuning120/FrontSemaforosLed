@@ -461,6 +461,7 @@ export default function AdminHero({ baseUrl, token }) {
               maxScale={3}
               centerOnInit={true}
               limitToBounds={false}
+              wheel={{ step: 0.002 }}
             >
               {({ zoomIn, zoomOut, resetTransform }) => (
                 <div style={{ width: '100%', height: '100%' }}>
