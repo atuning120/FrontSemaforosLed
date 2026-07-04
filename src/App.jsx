@@ -5,7 +5,6 @@ import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
 import ProductCarousel from './components/ProductCarousel.jsx';
 import ProductCatalog from './components/ProductCatalog.jsx';
-import InfoSection from './components/InfoSection.jsx';
 import ProductModal from './components/ProductModal.jsx';
 import WhatsAppButton from './components/WhatsAppButton.jsx';
 import styles from './App.module.css';
@@ -118,8 +117,6 @@ export default function App() {
       />
 
       <Hero />
-
-      <InfoSection />
 
       <ProductCarousel
         title="Productos destacados"

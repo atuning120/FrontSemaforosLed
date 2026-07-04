@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Mail, MapPin, MessageCircle } from 'lucide-react';
 import { FaFacebookF, FaInstagram, FaYoutube, FaGithub } from 'react-icons/fa';
 import styles from './Footer.module.css';
 import ContactPopover from './ContactPopover';
+import MapPopover from './MapPopover';
 
 export default function Footer() {
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
@@ -93,14 +96,20 @@ export default function Footer() {
                 </li>
               </ul>
               <ul>
-                <li className={styles.contactCard}>
-                  <div className={`${styles.iconContainer} ${styles.isAccent}`}>
-                    <MapPin className={styles.icon} />
-                  </div>
-                  <div>
-                    <span>Ubicacion</span>
-                    <strong>{import.meta.env.VITE_STORE_ADDRESS || 'Maipú 942 Este, San Juan, Argentina'}</strong>
-                  </div>
+                <li>
+                  <MapPopover 
+                    buttonContent={
+                      <div className={styles.contactCard} style={{ textDecoration: 'none' }}>
+                        <div className={`${styles.iconContainer} ${styles.isAccent}`}>
+                          <MapPin className={styles.icon} />
+                        </div>
+                        <div>
+                          <span>Ubicacion</span>
+                          <strong>{import.meta.env.VITE_STORE_ADDRESS || 'Maipú 942 Este, San Juan, Argentina'}</strong>
+                        </div>
+                      </div>
+                    }
+                  />
                 </li>
               </ul>
             </div>
