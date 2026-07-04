@@ -7,6 +7,7 @@ import ProductCarousel from './components/ProductCarousel.jsx';
 import ProductCatalog from './components/ProductCatalog.jsx';
 import ProductModal from './components/ProductModal.jsx';
 import WhatsAppButton from './components/WhatsAppButton.jsx';
+import VideoSection from './components/VideoSection.jsx';
 import styles from './App.module.css';
 
 export default function App() {
@@ -141,6 +142,8 @@ export default function App() {
         onProductClick={setSelectedProduct}
         onQuote={handleQuoteWhatsApp}
       />
+
+      <VideoSection />
 
       <Footer />
 
