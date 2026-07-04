@@ -120,6 +120,7 @@ export default function App() {
       <Hero />
 
       <ProductCarousel
+        id="featured-section"
         title="Productos destacados"
         subtitle="Calidad garantizada Semaforos Led"
         themeColor="var(--accent-500)"
@@ -143,9 +144,13 @@ export default function App() {
         onQuote={handleQuoteWhatsApp}
       />
 
-      <VideoSection />
+      <div id="video-section">
+        <VideoSection />
+      </div>
 
-      <Footer />
+      <div id="footer">
+        <Footer />
+      </div>
 
       {selectedProduct ? (
         <ProductModal

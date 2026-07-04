@@ -577,3 +577,184 @@
     transform: translate(-50%, -50%) scale(0.22);
   }
 }
+.dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.02);
+  margin-top: 0.5rem;
+}
+
+.dropzone:hover, .dropzone:focus-within {
+  border-color: var(--accent-500);
+}
+
+.dropzone.dragActive {
+  border-color: var(--accent-400);
+  background: rgba(59, 130, 246, 0.15);
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.dropzone.dragActive * {
+  pointer-events: none;
+}
+
+.dropzone p {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+.colorPicker {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.colorOption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.colorOption:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.colorOptionActive {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-400);
+}
+
+.colorDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.colorText {
+  display: flex;
+  flex-direction: column;
+}
+
+.colorName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #f8fafc;
+}
+
+.colorDesc {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+.actionPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.actionOption {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.actionOption:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.actionOptionActive {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-400);
+  color: var(--accent-300);
+}
+
+.toggleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  cursor: pointer;
+}
+
+.toggleLabel {
+  display: flex;
+  flex-direction: column;
+}
+
+.toggleTitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #f8fafc;
+}
+
+.toggleDesc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.15rem;
+}
+
+.toggleSwitch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  transition: background-color 0.3s;
+  flex-shrink: 0;
+}
+
+.toggleSwitch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.toggleSwitch.active {
+  background-color: #22c55e;
+}
+
+.toggleSwitch.active::after {
+  transform: translateX(20px);
+}
+
+.helperText {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 0.25rem;
+  display: block;
+}
