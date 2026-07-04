@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash, Save, MessageCircle, MapPin, CreditCard, Building, Clock, Layout, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { Plus, Trash, Save, MessageCircle, MapPin, CreditCard, Building, Clock, Layout, ZoomIn, ZoomOut, Maximize, Star, Video, Phone } from 'lucide-react';
 import { polyfill } from "mobile-drag-drop";
 import "mobile-drag-drop/default.css";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
@@ -13,7 +13,7 @@ polyfill({
 
 // Requisito para navegadores móviles modernos (iOS Safari, Chrome Android)
 // Permite que el polyfill pueda detener el scroll nativo al iniciar el arrastre
-window.addEventListener('touchmove', function() {}, {passive: false});
+window.addEventListener('touchmove', function () { }, { passive: false });
 
 const emptyForm = {
   badge: '',
@@ -29,6 +29,7 @@ const emptyForm = {
   detailInfoAddress: '',
   detailInfoHours: '',
   order: 1,
+  overlayOpacity: 100,
 };
 
 export default function AdminHero({ baseUrl, token }) {
@@ -42,6 +43,7 @@ export default function AdminHero({ baseUrl, token }) {
   const [notice, setNotice] = useState('');
   const [draggedScreenId, setDraggedScreenId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const headers = useMemo(
     () => ({
@@ -94,6 +96,7 @@ export default function AdminHero({ baseUrl, token }) {
       detailInfoAddress: screen.detailInfo?.address || '',
       detailInfoHours: screen.detailInfo?.hours || '',
       order: screen.order || 1,
+      overlayOpacity: screen.overlayOpacity !== undefined ? Number(screen.overlayOpacity) : 100,
     });
   };
 
@@ -124,6 +127,7 @@ export default function AdminHero({ baseUrl, token }) {
       hours: f.detailInfoHours
     } : null,
     order: Number(f.order),
+    overlayOpacity: Number(f.overlayOpacity),
   });
 
   const showToast = (msg) => {
@@ -241,6 +245,34 @@ export default function AdminHero({ baseUrl, token }) {
     }
   };
 
+  const handleImageDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleImageDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleImageDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleImageDrop = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      await handleImageUpload({ target: { files: [file] } });
+    }
+  };
+
   const handleDragStart = (e, screenId) => {
     setDraggedScreenId(screenId);
     e.dataTransfer.effectAllowed = 'move';
@@ -302,15 +334,33 @@ export default function AdminHero({ baseUrl, token }) {
     }
   };
 
+  const colorOptions = [
+    { value: 'badgeCyan', label: 'Cyan', color: '#0891b2', desc: 'Tecnología' },
+    { value: 'badgeEmerald', label: 'Esmeralda', color: '#10b981', desc: 'Novedad' },
+    { value: 'badgeAmber', label: 'Ámbar', color: '#f59e0b', desc: 'Envíos' },
+    { value: 'badgeIndigo', label: 'Índigo', color: '#6366f1', desc: 'Pagos' },
+  ];
+
+  const actionOptions = [
+    { value: 'catalog', label: 'Catálogo', icon: <Layout size={16} /> },
+    { value: 'featured', label: 'Destacados', icon: <Star size={16} /> },
+    { value: 'videos', label: 'Videos', icon: <Video size={16} /> },
+    { value: 'contact', label: 'Contactos', icon: <Phone size={16} /> },
+  ];
+
   const renderPreview = () => (
     <div className={heroStyles.slide} style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', padding: 0 }}>
       <div className={heroStyles.slideBackground}>
-        <img src={form.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop'} alt="" className={heroStyles.slideImage} />
+        <img
+          src={form.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop'}
+          alt=""
+          className={heroStyles.slideImage}
+        />
         <div className={heroStyles.slidePattern}></div>
-        <div className={heroStyles.slideGradientBottom}></div>
-        <div className={heroStyles.slideGradientRight}></div>
+        <div className={heroStyles.slideGradientBottom} style={{ opacity: form.overlayOpacity !== undefined ? form.overlayOpacity / 100 : 1 }}></div>
+        <div className={heroStyles.slideGradientRight} style={{ opacity: form.overlayOpacity !== undefined ? form.overlayOpacity / 100 : 1 }}></div>
       </div>
-      
+
       <div className={heroStyles.slideContent} style={{ padding: 'clamp(2rem, 5vw, 4rem)', margin: 0, justifyContent: 'center' }}>
         <div className={`${heroStyles.badge} ${heroStyles[form.badgeClass] || heroStyles.badgeCyan}`} style={{ alignSelf: 'flex-start' }}>
           <span className={heroStyles.badgeDot}></span>
@@ -323,7 +373,7 @@ export default function AdminHero({ baseUrl, token }) {
         <p className={heroStyles.description} style={{ maxWidth: '600px' }}>
           {form.description || 'Descripción corta de la promoción o servicio...'}
         </p>
-        
+
         {(form.detailInfoAddress || form.detailInfoHours) && (
           <div className={heroStyles.infoBox}>
             {form.detailInfoAddress && (
@@ -346,7 +396,7 @@ export default function AdminHero({ baseUrl, token }) {
             )}
           </div>
         )}
-        
+
         <div className={heroStyles.actions}>
           <button className={heroStyles.primaryButton}>
             {form.ctaText || 'VER PRODUCTOS'}
@@ -411,6 +461,7 @@ export default function AdminHero({ baseUrl, token }) {
               maxScale={3}
               centerOnInit={true}
               limitToBounds={false}
+              wheel={{ step: 0.002 }}
             >
               {({ zoomIn, zoomOut, resetTransform }) => (
                 <div style={{ width: '100%', height: '100%' }}>
@@ -455,11 +506,32 @@ export default function AdminHero({ baseUrl, token }) {
               </div>
               <div className={styles.formGroup}>
                 <label>Fondo (Imagen)</label>
-                <div className={styles.imageUploadGroup}>
-                  <input className={styles.input} value={form.image} onChange={e => updateForm('image', e.target.value)} placeholder="URL de la imagen" style={{ flex: 1 }} />
-                  <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="heroImageUpload" />
-                  <label htmlFor="heroImageUpload" className={styles.uploadBtn}>Subir</label>
+                <div
+                  className={`${styles.dropzone} ${dragActive ? styles.dragActive : ''}`}
+                  onDragEnter={handleImageDragEnter}
+                  onDragLeave={handleImageDragLeave}
+                  onDragOver={handleImageDragOver}
+                  onDrop={handleImageDrop}
+                >
+                  <p>Arrastra una imagen aquí o haz clic para subir</p>
+                  <div className={styles.imageUploadGroup} style={{ marginTop: '1rem' }}>
+                    <input className={styles.input} value={form.image} onChange={e => updateForm('image', e.target.value)} placeholder="URL de la imagen" style={{ flex: 1 }} />
+                    <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="heroImageUpload" />
+                    <label htmlFor="heroImageUpload" className={styles.uploadBtn}>Subir</label>
+                  </div>
                 </div>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Opacidad del Degradado (Fondo Oscuro): {form.overlayOpacity !== undefined ? form.overlayOpacity : 100}%</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={form.overlayOpacity !== undefined ? form.overlayOpacity : 100}
+                  onChange={e => updateForm('overlayOpacity', e.target.value)}
+                  style={{ width: '100%' }}
+                />
               </div>
             </div>
 
@@ -471,12 +543,22 @@ export default function AdminHero({ baseUrl, token }) {
               </div>
               <div className={styles.formGroup}>
                 <label>Color</label>
-                <select className={styles.select} value={form.badgeClass} onChange={e => updateForm('badgeClass', e.target.value)}>
-                  <option value="badgeCyan">Cyan (Tecnología)</option>
-                  <option value="badgeEmerald">Esmeralda (Novedad)</option>
-                  <option value="badgeAmber">Ámbar (Envíos)</option>
-                  <option value="badgeIndigo">Índigo (Pagos)</option>
-                </select>
+                <div className={styles.colorPicker}>
+                  {colorOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`${styles.colorOption} ${form.badgeClass === opt.value ? styles.colorOptionActive : ''}`}
+                      onClick={() => updateForm('badgeClass', opt.value)}
+                    >
+                      <span className={styles.colorDot} style={{ backgroundColor: opt.color, color: opt.color }}></span>
+                      <div className={styles.colorText}>
+                        <span className={styles.colorName}>{opt.label}</span>
+                        <span className={styles.colorDesc}>{opt.desc}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -484,19 +566,23 @@ export default function AdminHero({ baseUrl, token }) {
               <span className={styles.sectionTitle}>Textos Principales</span>
               <div className={styles.formGroup}>
                 <label>Título 1</label>
-                <input className={styles.input} value={form.titlePrimary} onChange={e => updateForm('titlePrimary', e.target.value)} />
+                <input className={styles.input} value={form.titlePrimary} onChange={e => updateForm('titlePrimary', e.target.value)} placeholder="Ej: TECNOLOGÍA LED" />
+                <span className={styles.helperText}>Primera línea del título principal.</span>
               </div>
               <div className={styles.formGroup}>
                 <label>Título 2</label>
-                <input className={styles.input} value={form.titleSecondary} onChange={e => updateForm('titleSecondary', e.target.value)} />
+                <input className={styles.input} value={form.titleSecondary} onChange={e => updateForm('titleSecondary', e.target.value)} placeholder="Ej: Y" />
+                <span className={styles.helperText}>Segunda línea, texto normal.</span>
               </div>
               <div className={styles.formGroup}>
                 <label>Palabra Resaltada</label>
-                <input className={styles.input} value={form.titleHighlight} onChange={e => updateForm('titleHighlight', e.target.value)} />
+                <input className={styles.input} value={form.titleHighlight} onChange={e => updateForm('titleHighlight', e.target.value)} placeholder="Ej: SUMINISTROS" />
+                <span className={styles.helperText}>Esta palabra se mostrará en color de acento.</span>
               </div>
               <div className={styles.formGroup}>
                 <label>Descripción</label>
-                <textarea className={styles.textarea} value={form.description} onChange={e => updateForm('description', e.target.value)} />
+                <textarea className={styles.textarea} value={form.description} onChange={e => updateForm('description', e.target.value)} placeholder="Breve texto introductorio..." />
+                <span className={styles.helperText}>Aparece debajo del título principal.</span>
               </div>
             </div>
 
@@ -516,20 +602,40 @@ export default function AdminHero({ baseUrl, token }) {
               <span className={styles.sectionTitle}>Botones de Acción (CTA)</span>
               <div className={styles.formGroup}>
                 <label>Texto del Botón Principal</label>
-                <input className={styles.input} value={form.ctaText} onChange={e => updateForm('ctaText', e.target.value)} />
+                <input className={styles.input} value={form.ctaText} onChange={e => updateForm('ctaText', e.target.value)} placeholder="Ej: VER PRODUCTOS" />
               </div>
               <div className={styles.formGroup}>
                 <label>Acción del Botón</label>
-                <select className={styles.select} value={form.ctaAction} onChange={e => updateForm('ctaAction', e.target.value)}>
-                  <option value="catalog">Ir a Catálogo</option>
-                  <option value="offers">Ir a Ofertas</option>
-                  <option value="location">Ir a Ubicación</option>
-                </select>
+                <div className={styles.actionPicker}>
+                  {actionOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`${styles.actionOption} ${form.ctaAction === opt.value ? styles.actionOptionActive : ''}`}
+                      onClick={() => {
+                        updateForm('ctaAction', opt.value);
+                        const defaultTexts = {
+                          catalog: 'VER PRODUCTOS',
+                          featured: 'VER DESTACADOS',
+                          videos: 'VER VIDEOS',
+                          contact: 'CONTACTANOS'
+                        };
+                        updateForm('ctaText', defaultTexts[opt.value]);
+                      }}
+                    >
+                      {opt.icon}
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <label className={styles.checkbox} style={{ marginTop: '0.5rem' }}>
-                <input type="checkbox" checked={form.whatsappBadge} onChange={e => updateForm('whatsappBadge', e.target.checked)} />
-                Incluir Botón de WhatsApp
-              </label>
+              <div className={styles.toggleContainer} onClick={() => updateForm('whatsappBadge', !form.whatsappBadge)}>
+                <div className={styles.toggleLabel}>
+                  <span className={styles.toggleTitle}>Botón de WhatsApp</span>
+                  <span className={styles.toggleDesc}>Muestra un botón secundario para pedidos</span>
+                </div>
+                <div className={`${styles.toggleSwitch} ${form.whatsappBadge ? styles.active : ''}`}></div>
+              </div>
             </div>
           </div>
 

@@ -94,8 +94,12 @@ export default function Hero() {
   const handleCtaAction = (action) => {
     let el;
     if (action === 'catalog') el = document.getElementById('catalog');
-    else if (action === 'location') el = document.getElementById('footer-location');
-    else if (action === 'offers') el = document.getElementById('offers-section') || document.getElementById('catalog');
+    else if (action === 'featured') el = document.getElementById('featured-section') || document.getElementById('catalog');
+    else if (action === 'videos') el = document.getElementById('video-section');
+    else if (action === 'contact') el = document.getElementById('footer-location') || document.getElementById('footer') || document.querySelector('footer');
+    else if (action === 'location') el = document.getElementById('footer-location') || document.querySelector('footer'); // keep for backward compatibility
+    else if (action === 'offers') el = document.getElementById('featured-section') || document.getElementById('catalog'); // backward compatibility
+
 
     if (el) {
       const offset = 80;
@@ -154,10 +158,14 @@ export default function Hero() {
                     className={styles.slide}
                   >
                     <div className={styles.slideBackground}>
-                      <img src={slide.image} alt="" className={styles.slideImage} />
+                      <img 
+                        src={slide.image} 
+                        alt="" 
+                        className={styles.slideImage} 
+                      />
                       <div className={styles.slidePattern}></div>
-                      <div className={styles.slideGradientBottom}></div>
-                      <div className={styles.slideGradientRight}></div>
+                      <div className={styles.slideGradientBottom} style={{ opacity: slide.overlayOpacity !== undefined ? slide.overlayOpacity / 100 : 1 }}></div>
+                      <div className={styles.slideGradientRight} style={{ opacity: slide.overlayOpacity !== undefined ? slide.overlayOpacity / 100 : 1 }}></div>
                     </div>
 
                     <div className={styles.slideContent}>

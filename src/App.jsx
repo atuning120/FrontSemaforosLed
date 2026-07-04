@@ -5,9 +5,9 @@ import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
 import ProductCarousel from './components/ProductCarousel.jsx';
 import ProductCatalog from './components/ProductCatalog.jsx';
-import InfoSection from './components/InfoSection.jsx';
 import ProductModal from './components/ProductModal.jsx';
 import WhatsAppButton from './components/WhatsAppButton.jsx';
+import VideoSection from './components/VideoSection.jsx';
 import styles from './App.module.css';
 
 export default function App() {
@@ -119,9 +119,8 @@ export default function App() {
 
       <Hero />
 
-      <InfoSection />
-
       <ProductCarousel
+        id="featured-section"
         title="Productos destacados"
         subtitle="Calidad garantizada Semaforos Led"
         themeColor="var(--accent-500)"
@@ -145,7 +144,13 @@ export default function App() {
         onQuote={handleQuoteWhatsApp}
       />
 
-      <Footer />
+      <div id="video-section">
+        <VideoSection />
+      </div>
+
+      <div id="footer">
+        <Footer />
+      </div>
 
       {selectedProduct ? (
         <ProductModal
