@@ -29,24 +29,73 @@
 			font-weight: 800;
 			text-transform: uppercase;
 			letter-spacing: 0.15em;
-			border: 1px solid rgba(255, 255, 255, 0.1);
-			background: rgba(255, 255, 255, 0.05);
-			color: rgba(255, 255, 255, 0.45);
+
+			/* Default transparent color replaced by nth-child vars */
+			--tag-color: 255, 255, 255;
+			border: 1px solid rgba(var(--tag-color), 0.2);
+			background: rgba(var(--tag-color), 0.08);
+			color: rgba(var(--tag-color), 0.85);
+
 			cursor: pointer;
 			transition: all 0.2s ease;
+			-webkit-tap-highlight-color: transparent;
+			outline: none;
 
 			&:hover {
 				color: #fff;
-				border-color: rgba(255, 255, 255, 0.2);
+				background: rgba(var(--tag-color), 0.18);
+				border-color: rgba(var(--tag-color), 0.4);
 			}
-
 		}
 
-		.categoryButtonActive {
-			background: var(--accent-500);
-			border-color: var(--accent-500);
+		/* Asignar un color distinto a cada opción para que se vean variados pero profesionales */
+		.categoryButton:nth-child(1) {
+			--tag-color: 16, 185, 129;
+		}
+
+		/* Esmeralda */
+		.categoryButton:nth-child(2) {
+			--tag-color: 139, 92, 246;
+		}
+
+		/* Violeta */
+		.categoryButton:nth-child(3) {
+			--tag-color: 245, 158, 11;
+		}
+
+		/* Ámbar */
+		.categoryButton:nth-child(4) {
+			--tag-color: 236, 72, 153;
+		}
+
+		/* Rosa */
+		.categoryButton:nth-child(5) {
+			--tag-color: 6, 182, 212;
+		}
+
+		/* Cian */
+		.categoryButton:nth-child(6) {
+			--tag-color: 239, 68, 68;
+		}
+
+		/* Rojo */
+		.categoryButton:nth-child(7) {
+			--tag-color: 132, 204, 22;
+		}
+
+		/* Lima */
+		.categoryButton:nth-child(8) {
+			--tag-color: 99, 102, 241;
+		}
+
+		/* Índigo */
+
+		.categoryButtonActive,
+		.categoryButtonActive:hover {
+			background: rgb(var(--tag-color));
+			border-color: rgb(var(--tag-color));
 			color: #fff;
-			box-shadow: 0 16px 30px rgba(59, 130, 246, 0.3);
+			box-shadow: 0 12px 25px rgba(var(--tag-color), 0.35);
 		}
 	}
 
@@ -85,7 +134,25 @@
 			}
 		}
 	}
+}
+
+@media (max-width: 768px) {
 
 
+	.filters {
+		.categoryList {
+			flex-direction: column;
+			width: 100%;
 
+			.categoryButton {
+				width: 100%;
+				font-size: 1rem;
+				padding: 0.6rem 1.5rem;
+			}
+		}
+
+		.searchWrap {
+			max-width: 100%;
+		}
+	}
 }

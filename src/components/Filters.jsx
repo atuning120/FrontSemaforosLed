@@ -15,11 +15,10 @@ export default function Filters({
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`${styles.categoryButton} ${
-              activeCategory === cat ? styles.categoryButtonActive : ''
-            }`}
+            className={`${styles.categoryButton} ${activeCategory === cat ? styles.categoryButtonActive : ''
+              }`}
           >
-            {cat === 'Todos' ? 'TODOS' : cat}
+            {cat}
           </button>
         ))}
       </div>
@@ -28,7 +27,7 @@ export default function Filters({
         <Search className={styles.searchIcon} />
         <input
           type="text"
-          placeholder="Buscar semáforos, luminaria..."
+          placeholder="Buscar cables, reflectores..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className={styles.searchInput}

@@ -347,17 +347,17 @@ export default function AdminProducts({ baseUrl, token }) {
         }
         urls.push(data.imageUrl.startsWith('/') ? `${baseUrl}${data.imageUrl}` : data.imageUrl);
       }
-      
+
       const updateFn = (prev) => {
         const currentImages = prev.imagenes?.length > 0 ? prev.imagenes : (prev.imagen ? [prev.imagen] : []);
         let newImagenes = [...currentImages];
-        
+
         if (replaceIdx !== null && replaceIdx >= 0 && replaceIdx < newImagenes.length) {
           newImagenes.splice(replaceIdx, 1, ...urls);
         } else {
           newImagenes = [...newImagenes, ...urls];
         }
-        
+
         return { ...prev, imagen: newImagenes[0] || '', imagenes: newImagenes };
       };
 
@@ -382,7 +382,7 @@ export default function AdminProducts({ baseUrl, token }) {
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
-      activeCategory === 'todos' || product.categoria === activeCategory;
+      product.categoria === activeCategory;
     if (!matchesCategory) return false;
 
     if (!searchQuery.trim()) return true;
@@ -397,7 +397,7 @@ export default function AdminProducts({ baseUrl, token }) {
       .join(' ');
 
     const terms = searchQuery.trim().split(/\s+/).filter(Boolean);
-    
+
     const regexes = terms.map((term) => {
       try {
         return new RegExp(term, 'i');
@@ -460,7 +460,7 @@ export default function AdminProducts({ baseUrl, token }) {
         <Filters
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          filterCategories={['todos', ...BASE_CATEGORIES]}
+          filterCategories={[...BASE_CATEGORIES]}
           activeCategory={activeCategory}
           setActiveCategory={setActiveCategory}
         />
@@ -473,8 +473,8 @@ export default function AdminProducts({ baseUrl, token }) {
         <div className={styles.productsGrid}>
           {paginatedProducts.map((product) => {
             return (
-              <div 
-                key={product.sku} 
+              <div
+                key={product.sku}
                 className={`${styles.productCard} ${activeMobileCard === product.sku ? styles.activeMobileCard : ''}`}
                 onClick={(e) => {
                   if (window.innerWidth <= 768) {
@@ -501,7 +501,7 @@ export default function AdminProducts({ baseUrl, token }) {
                       </span>
                     </div>
                   )}
-                  
+
                   <div className={styles.adminOverlay}>
                     <button onClick={() => startEdit(product)} className={styles.overlayBtn}>
                       Editar
@@ -511,7 +511,7 @@ export default function AdminProducts({ baseUrl, token }) {
                     </button>
                   </div>
                 </div>
-                  
+
                 <div className={styles.productContent}>
                   <span className={styles.productTag}>{product.categoria}</span>
                   <div className={styles.productHeadline}>
@@ -521,7 +521,7 @@ export default function AdminProducts({ baseUrl, token }) {
                     {product.descripcion?.substring(0, 80)}
                     {product.descripcion?.length > 80 ? '...' : ''}
                   </p>
-                  
+
                   <div className={styles.productActions} />
                 </div>
               </div>
@@ -558,9 +558,8 @@ export default function AdminProducts({ baseUrl, token }) {
               <button
                 key={page}
                 onClick={() => handlePageChange(page)}
-                className={`${styles.paginationPageButton} ${
-                  page === clampedCurrent ? styles.paginationPageActive : ''
-                }`}
+                className={`${styles.paginationPageButton} ${page === clampedCurrent ? styles.paginationPageActive : ''
+                  }`}
               >
                 {page}
               </button>
@@ -637,8 +636,8 @@ export default function AdminProducts({ baseUrl, token }) {
 
                   </div>
                 </div>
-                
-                                                {/* INICIO GALERIA */}
+
+                {/* INICIO GALERIA */}
                 {(editForm.imagenes?.length > 0 || editForm.imagen) && (
                   <div className={styles.galleryContainer}>
                     <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Galería de imágenes</p>
@@ -647,8 +646,8 @@ export default function AdminProducts({ baseUrl, token }) {
                         const isMain = img === editForm.imagen;
                         const isSelected = selectedImageIdxEdit === idx;
                         return (
-                          <div 
-                            key={idx} 
+                          <div
+                            key={idx}
                             className={`${styles.galleryItem} ${isMain ? styles.galleryItemMain : ''} ${isSelected ? styles.galleryItemSelected : ''}`}
                             draggable={true}
                             onClick={() => {
@@ -677,7 +676,7 @@ export default function AdminProducts({ baseUrl, token }) {
                                 return { ...prev, imagenes: newImages, imagen: newImages[0] || '' };
                               });
                               setDraggedImgIdx(null);
-                              
+
                               if (selectedImageIdxEdit === draggedImgIdx) {
                                 setSelectedImageIdxEdit(idx);
                               } else if (selectedImageIdxEdit !== null) {
@@ -712,12 +711,12 @@ export default function AdminProducts({ baseUrl, token }) {
                       className={styles.input}
                     />
                   </label>
-                  
+
                   <label className={styles.label}>
                     SKU
                     <input value={editForm.sku} className={styles.input} disabled />
                   </label>
-                  
+
                   <label className={styles.label}>
                     Categoria
                     <select
@@ -890,7 +889,7 @@ export default function AdminProducts({ baseUrl, token }) {
                               <ChevronRight size={16} />
                             </button>
                           </div>
-                          
+
                           <button
                             type="button"
                             className={styles.danger}
@@ -918,8 +917,8 @@ export default function AdminProducts({ baseUrl, token }) {
                           className={styles.input}
                           placeholder="https://ejemplo.com/imagen.jpg"
                         />
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           className={selectedImageIdxEdit !== null ? styles.primary : styles.secondary}
                           onClick={() => {
                             const url = urlInputEdit.trim();
@@ -951,8 +950,8 @@ export default function AdminProducts({ baseUrl, token }) {
                         onDrop={(e) => handleDrop(e, true, selectedImageIdxEdit)}
                       >
                         <p>
-                          {selectedImageIdxEdit !== null 
-                            ? 'Arrastra una imagen aquí o haz clic para reemplazar' 
+                          {selectedImageIdxEdit !== null
+                            ? 'Arrastra una imagen aquí o haz clic para reemplazar'
                             : 'Arrastra tu(s) imagen(es) aquí o haz clic para subir'}
                         </p>
                         <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
@@ -960,21 +959,21 @@ export default function AdminProducts({ baseUrl, token }) {
                         </p>
                         <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
                           Seleccionar archivo{selectedImageIdxEdit !== null ? '' : '(s)'}
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            multiple={selectedImageIdxEdit === null} 
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple={selectedImageIdxEdit === null}
                             onChange={(e) => {
                               handleImageUpload(e, true, selectedImageIdxEdit);
                               if (selectedImageIdxEdit !== null) setSelectedImageIdxEdit(null);
-                            }} 
-                            style={{ display: 'none' }} 
+                            }}
+                            style={{ display: 'none' }}
                           />
                         </label>
                       </div>
                     )}
                   </div>
-                  
+
                   <label className={styles.label} style={{ gridColumn: '1 / -1' }}>
                     Descripcion
                     <textarea
@@ -1046,7 +1045,7 @@ export default function AdminProducts({ baseUrl, token }) {
 
                   </div>
                 </div>
-                
+
                 {/* INICIO GALERIA */}
                 {(createForm.imagenes?.length > 0 || createForm.imagen) && (
                   <div className={styles.galleryContainer}>
@@ -1056,8 +1055,8 @@ export default function AdminProducts({ baseUrl, token }) {
                         const isMain = img === createForm.imagen;
                         const isSelected = selectedImageIdxCreate === idx;
                         return (
-                          <div 
-                            key={idx} 
+                          <div
+                            key={idx}
                             className={`${styles.galleryItem} ${isMain ? styles.galleryItemMain : ''} ${isSelected ? styles.galleryItemSelected : ''}`}
                             draggable={true}
                             onClick={() => {
@@ -1312,7 +1311,7 @@ export default function AdminProducts({ baseUrl, token }) {
                               <ChevronRight size={16} />
                             </button>
                           </div>
-                          
+
                           <button
                             type="button"
                             className={styles.danger}
@@ -1340,8 +1339,8 @@ export default function AdminProducts({ baseUrl, token }) {
                           className={styles.input}
                           placeholder="https://ejemplo.com/imagen.jpg"
                         />
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           className={selectedImageIdxCreate !== null ? styles.primary : styles.secondary}
                           onClick={() => {
                             const url = urlInputCreate.trim();
@@ -1373,8 +1372,8 @@ export default function AdminProducts({ baseUrl, token }) {
                         onDrop={(e) => handleDrop(e, false, selectedImageIdxCreate)}
                       >
                         <p>
-                          {selectedImageIdxCreate !== null 
-                            ? 'Arrastra una imagen aquí o haz clic para reemplazar' 
+                          {selectedImageIdxCreate !== null
+                            ? 'Arrastra una imagen aquí o haz clic para reemplazar'
                             : 'Arrastra tu(s) imagen(es) aquí o haz clic para subir'}
                         </p>
                         <p className={styles.notice} style={{ marginTop: '-0.2rem', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
@@ -1382,15 +1381,15 @@ export default function AdminProducts({ baseUrl, token }) {
                         </p>
                         <label className={styles.secondary} style={{ cursor: 'pointer', margin: '0.5rem 0 0 0', display: 'inline-block' }}>
                           Seleccionar archivo{selectedImageIdxCreate !== null ? '' : '(s)'}
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            multiple={selectedImageIdxCreate === null} 
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple={selectedImageIdxCreate === null}
                             onChange={(e) => {
                               handleImageUpload(e, false, selectedImageIdxCreate);
                               if (selectedImageIdxCreate !== null) setSelectedImageIdxCreate(null);
-                            }} 
-                            style={{ display: 'none' }} 
+                            }}
+                            style={{ display: 'none' }}
                           />
                         </label>
                       </div>
