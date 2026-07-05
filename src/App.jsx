@@ -75,7 +75,7 @@ export default function App() {
     cats.add('semáforos');
     cats.add('luminarias');
     cats.add('cartelería vial');
-    return ['Todos', ...Array.from(cats)];
+    return [...Array.from(cats)];
   }, [products]);
 
   const filteredProducts = useMemo(() => {
