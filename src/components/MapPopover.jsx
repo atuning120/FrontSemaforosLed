@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import styles from './MapPopover.module.css';
 
-export default function MapPopover({ buttonContent }) {
+export default function MapPopover({ buttonContent, mapUrl }) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef(null);
 
@@ -51,7 +51,7 @@ export default function MapPopover({ buttonContent }) {
           <div className={styles.body}>
             <div className={styles.mapContainer}>
               <iframe 
-                src="https://maps.google.com/maps?q=-31.5402377,-68.5173167&hl=es&z=16&output=embed" 
+                src={mapUrl || "https://maps.google.com/maps?q=-31.5402377,-68.5173167&hl=es&z=16&output=embed"} 
                 allowFullScreen="" 
                 loading="lazy" 
                 referrerPolicy="no-referrer-when-downgrade"

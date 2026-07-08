@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, MapPin, MessageCircle } from 'lucide-react';
 import { FaFacebookF, FaInstagram, FaYoutube, FaGithub } from 'react-icons/fa';
 import styles from './Footer.module.css';
@@ -6,7 +6,20 @@ import ContactPopover from './ContactPopover';
 import MapPopover from './MapPopover';
 
 export default function Footer() {
-  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [storeAddress, setStoreAddress] = useState(import.meta.env.VITE_STORE_ADDRESS || 'Maipú 942 Este, San Juan, Argentina');
+  const [mapUrl, setMapUrl] = useState('https://maps.google.com/maps?q=-31.5402377,-68.5173167&hl=es&z=16&output=embed');
+
+  useEffect(() => {
+    const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    fetch(`${baseUrl}/api/settings`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.storeAddressName) setStoreAddress(data.storeAddressName);
+        if (data.storeAddressMapUrl) setMapUrl(data.storeAddressMapUrl);
+      })
+      .catch(err => console.error('Error loading settings:', err));
+  }, []);
+
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
@@ -98,6 +111,7 @@ export default function Footer() {
               <ul>
                 <li>
                   <MapPopover 
+                    mapUrl={mapUrl}
                     buttonContent={
                       <div className={styles.contactCard} style={{ textDecoration: 'none' }}>
                         <div className={`${styles.iconContainer} ${styles.isAccent}`}>
@@ -105,7 +119,7 @@ export default function Footer() {
                         </div>
                         <div>
                           <span>Ubicacion</span>
-                          <strong>{import.meta.env.VITE_STORE_ADDRESS || 'Maipú 942 Este, San Juan, Argentina'}</strong>
+                          <strong>{storeAddress}</strong>
                         </div>
                       </div>
                     }
