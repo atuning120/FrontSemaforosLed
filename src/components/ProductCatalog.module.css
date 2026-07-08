@@ -224,10 +224,6 @@
 		box-shadow: 0 6px 20px rgba(168, 85, 247, 0.2);
 	}
 
-	@keyframes pulse-glow {
-		0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-		50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15); }
-	}
 
 	.hideMobile {
 		@media (max-width: 768px) {
@@ -245,6 +241,11 @@
 		opacity: 1;
 		transform: translateY(0);
 	}
+}
+
+@keyframes pulse-glow {
+	0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+	50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15); }
 }
 
 @media (min-width: 768px) {
