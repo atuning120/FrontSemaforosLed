@@ -165,3 +165,66 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+.captchaContainer {
+  margin-top: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.captchaImageWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.captchaSvg {
+  background: #f4f4f4;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  width: 150px;
+}
+
+.captchaSvg svg {
+  width: 100%;
+  height: 100%;
+}
+
+.captchaPlaceholder {
+  height: 50px;
+  width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+}
+
+.refreshCaptchaButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text);
+  border-radius: 0.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.2rem;
+}
+
+.refreshCaptchaButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(15deg);
+}
