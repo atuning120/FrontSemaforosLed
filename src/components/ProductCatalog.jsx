@@ -160,10 +160,36 @@ export default function ProductCatalog({
       )}
 
       {!loadingProducts && filteredProducts.length === 0 && (
-        <div className={styles.emptyState}>
-          <Search size={64} />
-          <p className={styles.heroSubtitle}>No se encontraron productos</p>
-        </div>
+        <motion.div 
+          className={styles.emptyState}
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <div className={styles.emptyIconContainer}>
+            <div className={styles.emptyIconGlow}></div>
+            <div className={styles.emptyIconWrapper}>
+              <Search size={40} strokeWidth={2} className={styles.emptyIconSvg} />
+            </div>
+          </div>
+          <h3 className={styles.emptyTitle}>No encontramos resultados</h3>
+          <p className={styles.emptySubtitle}>
+            No pudimos encontrar productos que coincidan con 
+            {searchQuery ? <span className={styles.highlight}> &quot;{searchQuery}&quot;</span> : " los filtros seleccionados"}.
+            <br />Intenta con otras palabras o limpia tu búsqueda.
+          </p>
+          {(searchQuery || activeCategory !== 'Todos') && (
+            <button 
+              onClick={() => {
+                setSearchQuery('');
+                setActiveCategory('Todos');
+              }}
+              className={styles.emptyClearButton}
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </motion.div>
       )}
     </section>
   );

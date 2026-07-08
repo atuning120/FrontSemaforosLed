@@ -136,17 +136,97 @@
 
 	.emptyState {
 		padding: 6rem 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
 		text-align: center;
-		opacity: 0.3;
+		position: relative;
 	}
 
-	.heroSubtitle {
-		max-width: 36rem;
-		color: rgba(255, 255, 255, 0.5);
+	.emptyIconContainer {
+		position: relative;
+		width: 100px;
+		height: 100px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 2rem;
+	}
+
+	.emptyIconGlow {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 130px;
+		height: 130px;
+		background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0) 70%);
+		filter: blur(15px);
+		animation: pulse-glow 3s ease-in-out infinite;
+	}
+
+	.emptyIconWrapper {
+		position: relative;
+		z-index: 1;
+		background: rgba(20, 20, 30, 0.8);
+		border-radius: 50%;
+		padding: 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(168, 85, 247, 0.3);
+	}
+
+	.emptyIconSvg {
+		color: #d8b4fe;
+	}
+
+	.emptyTitle {
+		font-size: 1.75rem;
+		font-weight: 700;
+		color: #ffffff;
+		margin: 0 0 0.75rem 0;
+		letter-spacing: -0.02em;
+	}
+
+	.emptySubtitle {
+		max-width: 28rem;
+		color: rgba(255, 255, 255, 0.6);
+		font-size: 1.05rem;
+		line-height: 1.6;
+		margin: 0 0 2rem 0;
+	}
+	
+	.highlight {
+		color: #e879f9;
+		font-weight: 600;
+	}
+
+	.emptyClearButton {
+		background: transparent;
+		color: #ffffff;
+		border: 1px solid rgba(168, 85, 247, 0.4);
+		background: rgba(168, 85, 247, 0.1);
+		padding: 0.75rem 1.75rem;
+		border-radius: 9999px;
 		font-size: 0.95rem;
-		font-weight: 500;
-		letter-spacing: 0.02em;
-		margin: 0;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+	}
+
+	.emptyClearButton:hover {
+		background: rgba(168, 85, 247, 0.2);
+		border-color: rgba(168, 85, 247, 0.8);
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(168, 85, 247, 0.2);
+	}
+
+	@keyframes pulse-glow {
+		0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+		50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15); }
 	}
 
 	.hideMobile {
