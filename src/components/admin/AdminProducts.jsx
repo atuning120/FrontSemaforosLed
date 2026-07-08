@@ -345,7 +345,7 @@ export default function AdminProducts({ baseUrl, token }) {
         if (!response.ok) {
           throw new Error(data.error || 'Error al subir imagen');
         }
-        urls.push(data.imageUrl.startsWith('/') ? `${baseUrl}${data.imageUrl}` : data.imageUrl);
+        urls.push(data.imageUrl);
       }
 
       const updateFn = (prev) => {

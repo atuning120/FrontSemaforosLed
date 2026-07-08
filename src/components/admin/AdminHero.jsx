@@ -226,7 +226,7 @@ export default function AdminHero({ baseUrl, token }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al subir');
 
-      const imageUrl = data.imageUrl.startsWith('/') ? `${baseUrl}${data.imageUrl}` : data.imageUrl;
+      const imageUrl = data.imageUrl;
       setForm((prev) => ({ ...prev, image: imageUrl }));
 
       // Actualizar localmente el thumbnail
