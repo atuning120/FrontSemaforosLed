@@ -62,7 +62,7 @@ export default function AdminProducts({ baseUrl, token }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [notice, setNotice] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('todos');
+  const [activeCategory, setActiveCategory] = useState('semáforos');
   const [dragActive, setDragActive] = useState(false);
   const [draggedImgIdx, setDraggedImgIdx] = useState(null);
   const [urlInputEdit, setUrlInputEdit] = useState('');
