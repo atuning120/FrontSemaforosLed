@@ -4,6 +4,7 @@ import { FaFacebookF, FaInstagram, FaYoutube, FaGithub } from 'react-icons/fa';
 import styles from './Footer.module.css';
 import ContactPopover from './ContactPopover';
 import MapPopover from './MapPopover';
+import WhatsAppPopover from './WhatsAppPopover';
 
 export default function Footer() {
   const [storeAddress, setStoreAddress] = useState(import.meta.env.VITE_STORE_ADDRESS || 'Maipú 942 Este, San Juan, Argentina');
@@ -87,25 +88,39 @@ export default function Footer() {
                 </li>
               </ul>
               <ul>
-                <li className={styles.contactCard}>
-                  <div className={`${styles.iconContainer} ${styles.isGreen}`}>
-                    <MessageCircle className={styles.icon} />
-                  </div>
-                  <div>
-                    <span>WhatsApp Soporte</span>
-                    <strong>+{import.meta.env.VITE_WHATSAPP_PHONE}</strong>
-                  </div>
+                <li>
+                  <WhatsAppPopover 
+                    phoneNumber={import.meta.env.VITE_WHATSAPP_PHONE}
+                    buttonContent={
+                      <div className={styles.contactCard} style={{ textDecoration: 'none' }}>
+                        <div className={`${styles.iconContainer} ${styles.isGreen}`}>
+                          <MessageCircle className={styles.icon} />
+                        </div>
+                        <div>
+                          <span>WhatsApp Soporte</span>
+                          <strong>+{import.meta.env.VITE_WHATSAPP_PHONE}</strong>
+                        </div>
+                      </div>
+                    }
+                  />
                 </li>
               </ul>
               <ul>
-                <li className={styles.contactCard}>
-                  <div className={`${styles.iconContainer} ${styles.isGreen}`}>
-                    <MessageCircle className={styles.icon} />
-                  </div>
-                  <div>
-                    <span>WhatsApp Comercial</span>
-                    <strong>+{import.meta.env.VITE_WHATSAPP_SECOND}</strong>
-                  </div>
+                <li>
+                  <WhatsAppPopover 
+                    phoneNumber={import.meta.env.VITE_WHATSAPP_SECOND}
+                    buttonContent={
+                      <div className={styles.contactCard} style={{ textDecoration: 'none' }}>
+                        <div className={`${styles.iconContainer} ${styles.isGreen}`}>
+                          <MessageCircle className={styles.icon} />
+                        </div>
+                        <div>
+                          <span>WhatsApp Comercial</span>
+                          <strong>+{import.meta.env.VITE_WHATSAPP_SECOND}</strong>
+                        </div>
+                      </div>
+                    }
+                  />
                 </li>
               </ul>
               <ul>
