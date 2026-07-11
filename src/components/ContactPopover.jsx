@@ -4,6 +4,7 @@ import styles from './ContactPopover.module.css';
 
 export default function ContactPopover({ buttonContent, targetEmail }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [placement, setPlacement] = useState('top');
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
   const [formData, setFormData] = useState({
     name: '',
@@ -12,6 +13,7 @@ export default function ContactPopover({ buttonContent, targetEmail }) {
   });
   
   const popoverRef = useRef(null);
+  const triggerRef = useRef(null);
 
   // Cerrar al hacer click afuera
   useEffect(() => {
@@ -28,6 +30,23 @@ export default function ContactPopover({ buttonContent, targetEmail }) {
       document.addEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
+
+  const togglePopover = () => {
+    if (!isOpen) {
+      if (triggerRef.current) {
+        const rect = triggerRef.current.getBoundingClientRect();
+        // If there's less than 380px above the trigger, open downwards
+        if (rect.top < 380) {
+          setPlacement('bottom');
+        } else {
+          setPlacement('top');
+        }
+      }
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -72,7 +91,8 @@ export default function ContactPopover({ buttonContent, targetEmail }) {
       {/* Botón que dispara el popover */}
       <div 
         className={styles.trigger}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={togglePopover}
+        ref={triggerRef}
         role="button"
         tabIndex={0}
       >
@@ -81,7 +101,7 @@ export default function ContactPopover({ buttonContent, targetEmail }) {
 
       {/* Popover content */}
       {isOpen && (
-        <div className={styles.popover}>
+        <div className={`${styles.popover} ${placement === 'top' ? styles.popoverTop : styles.popoverBottom}`}>
           <div className={styles.header}>
             <h4>Redactar Correo</h4>
             <button 
@@ -159,8 +179,8 @@ export default function ContactPopover({ buttonContent, targetEmail }) {
               </form>
             )}
           </div>
-          {/* Triángulo del tooltip apuntando hacia abajo */}
-          <div className={styles.arrow}></div>
+          {/* Triángulo del tooltip */}
+          <div className={`${styles.arrow} ${placement === 'top' ? styles.arrowTop : styles.arrowBottom}`}></div>
         </div>
       )}
     </div>
