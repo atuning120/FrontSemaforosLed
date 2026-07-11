@@ -12,8 +12,6 @@
 
 .popover {
   position: absolute;
-  bottom: calc(100% + 15px);
-  /* Por encima del trigger */
   left: 50%;
   transform: translateX(-50%);
   width: 320px;
@@ -22,11 +20,20 @@
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
   z-index: 100;
-  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   color: #f1f5f9;
 }
 
-@keyframes scaleIn {
+.popoverTop {
+  bottom: calc(100% + 15px);
+  animation: scaleInTop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.popoverBottom {
+  top: calc(100% + 15px);
+  animation: scaleInBottom 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleInTop {
   from {
     opacity: 0;
     transform: translateX(-50%) translateY(10px) scale(0.95);
@@ -38,17 +45,37 @@
   }
 }
 
+@keyframes scaleInBottom {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
 /* El triangulito de la "viñeta" */
 .arrow {
   position: absolute;
-  bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
+}
+
+.arrowTop {
+  bottom: -8px;
   border-top: 10px solid #1e293b;
+}
+
+.arrowBottom {
+  top: -8px;
+  border-bottom: 10px solid #1e293b;
 }
 
 /* El modo claro no aplica aquí ya que la página entera es oscura */
@@ -234,10 +261,18 @@
 @media (max-width: 768px) {
   .popover {
     left: 0;
-    transform: none;
-    animation: scaleInMobile 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     width: 290px;
     /* Un poco más angosto para asegurar que entre en pantallas de celulares pequeños */
+  }
+  
+  .popoverTop {
+    transform: none;
+    animation: scaleInMobileTop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .popoverBottom {
+    transform: none;
+    animation: scaleInMobileBottom 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   .arrow {
@@ -247,12 +282,22 @@
   }
 }
 
-@keyframes scaleInMobile {
+@keyframes scaleInMobileTop {
   from {
     opacity: 0;
     transform: translateY(10px) scale(0.95);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 
+@keyframes scaleInMobileBottom {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);

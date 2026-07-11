@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Filters from './Filters.jsx';
 import ProductCard from './ProductCard.jsx';
+import SkeletonCard from './SkeletonCard.jsx';
 import styles from './ProductCatalog.module.css';
 
 export default function ProductCatalog({
@@ -75,15 +76,15 @@ export default function ProductCatalog({
         />
       </div>
 
-      {loadingProducts && (
-        <div className={styles.loadingMessage}>Cargando productos...</div>
-      )}
-
-      {productsError && (
+      {loadingProducts ? (
+        <div className={styles.grid}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonCard key={`skeleton-${i}`} />
+          ))}
+        </div>
+      ) : productsError ? (
         <div className={styles.errorMessage}>{productsError}</div>
-      )}
-
-      {!loadingProducts && !productsError && (
+      ) : (
         <div className={styles.grid}>
             {paginatedProducts.map((product) => (
               <ProductCard
