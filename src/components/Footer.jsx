@@ -110,7 +110,7 @@ export default function Footer() {
               </ul>
               <ul>
                 <li>
-                  <MapPopover 
+                  <MapPopover
                     mapUrl={mapUrl}
                     buttonContent={
                       <div className={styles.contactCard} style={{ textDecoration: 'none' }}>

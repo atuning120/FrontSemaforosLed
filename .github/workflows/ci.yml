@@ -36,6 +36,7 @@ jobs:
           # Creamos el archivo .env.production al vuelo para que Vite lo lea (y evitamos el .dockerignore)
           echo "VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}" > .env.production
           echo "VITE_WHATSAPP_PHONE=${{ secrets.VITE_WHATSAPP_PHONE }}" >> .env.production
+          echo "VITE_WHATSAPP_SECOND=${{ secrets.VITE_WHATSAPP_SECOND }}" >> .env.production
           echo "VITE_EMAIL=${{ secrets.VITE_EMAIL }}" >> .env.production
           echo "VITE_CONSULTAS_EMAIL=${{ secrets.VITE_CONSULTAS_EMAIL }}" >> .env.production
 
