@@ -750,34 +750,20 @@ export default function AdminProducts({ baseUrl, token }) {
                     </select>
                   </label>
 
-                  <label className={styles.label}>
-                    Moneda
-                    <input
-                      value={editForm.moneda}
-                      onChange={(event) =>
-                        setEditForm((prev) => ({ ...prev, moneda: event.target.value }))
-                      }
-                      className={styles.input}
-                    />
-                  </label>
+
 
                   <label className={styles.label}>
                     ID Catalogo
                     <input
                       type="number"
                       value={editForm.id_catalogo}
-                      onChange={(event) =>
-                        setEditForm((prev) => ({
-                          ...prev,
-                          id_catalogo: event.target.value,
-                        }))
-                      }
                       className={styles.input}
+                      disabled
                     />
                   </label>
 
                   <div className={styles.checkboxGroup}>
-                    <label className={styles.checkbox} style={{ margin: 0 }}>
+                    <label className={styles.toggleSwitch}>
                       <input
                         type="checkbox"
                         checked={editForm.destacado}
@@ -788,7 +774,8 @@ export default function AdminProducts({ baseUrl, token }) {
                           }))
                         }
                       />
-                      Destacado
+                      <span className={styles.slider}></span>
+                      <span className={styles.toggleLabel}>Destacado</span>
                     </label>
                   </div>
 
@@ -1174,16 +1161,7 @@ export default function AdminProducts({ baseUrl, token }) {
                     </select>
                   </label>
 
-                  <label className={styles.label}>
-                    Moneda
-                    <input
-                      value={createForm.moneda}
-                      onChange={(event) =>
-                        setCreateForm((prev) => ({ ...prev, moneda: event.target.value }))
-                      }
-                      className={styles.input}
-                    />
-                  </label>
+
 
                   <label className={styles.label}>
                     ID Catalogo
@@ -1199,7 +1177,7 @@ export default function AdminProducts({ baseUrl, token }) {
                   </label>
 
                   <div className={styles.checkboxGroup}>
-                    <label className={styles.checkbox} style={{ margin: 0 }}>
+                    <label className={styles.toggleSwitch}>
                       <input
                         type="checkbox"
                         checked={createForm.destacado}
@@ -1210,7 +1188,8 @@ export default function AdminProducts({ baseUrl, token }) {
                           }))
                         }
                       />
-                      Destacado
+                      <span className={styles.slider}></span>
+                      <span className={styles.toggleLabel}>Destacado</span>
                     </label>
                   </div>
 
