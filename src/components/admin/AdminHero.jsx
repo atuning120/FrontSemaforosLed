@@ -1,5 +1,29 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash, Save, MessageCircle, MapPin, CreditCard, Building, Clock, Layout, ZoomIn, ZoomOut, Maximize, Star, Video, Phone } from 'lucide-react';
+import { Plus, Trash, Save, MessageCircle, MapPin, CreditCard, Building, Clock, Layout, ZoomIn, ZoomOut, Maximize, Star, Video, Phone, Mail, Info, Truck, Package, ShieldCheck, Award, ThumbsUp, Globe, Headphones, Zap, Tag, Gift, Calendar, CheckCircle } from 'lucide-react';
+
+const AVAILABLE_ICONS = [
+  { id: 'MapPin', component: MapPin },
+  { id: 'Clock', component: Clock },
+  { id: 'CreditCard', component: CreditCard },
+  { id: 'Building', component: Building },
+  { id: 'Phone', component: Phone },
+  { id: 'Mail', component: Mail },
+  { id: 'Star', component: Star },
+  { id: 'Info', component: Info },
+  { id: 'MessageCircle', component: MessageCircle },
+  { id: 'Truck', component: Truck },
+  { id: 'Package', component: Package },
+  { id: 'ShieldCheck', component: ShieldCheck },
+  { id: 'Award', component: Award },
+  { id: 'ThumbsUp', component: ThumbsUp },
+  { id: 'Globe', component: Globe },
+  { id: 'Headphones', component: Headphones },
+  { id: 'Zap', component: Zap },
+  { id: 'Tag', component: Tag },
+  { id: 'Gift', component: Gift },
+  { id: 'Calendar', component: Calendar },
+  { id: 'CheckCircle', component: CheckCircle }
+];
 import { polyfill } from "mobile-drag-drop";
 import "mobile-drag-drop/default.css";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
@@ -26,7 +50,15 @@ const emptyForm = {
   ctaText: 'VER PRODUCTOS',
   ctaAction: 'catalog',
   whatsappBadge: true,
+  detailInfoAddressTitle: '',
   detailInfoAddress: '',
+  detailInfoAddressIcon: 'MapPin',
+  detailInfoHoursTitle: '',
+  detailInfoHours: '',
+  detailInfoHoursIcon: 'Clock',
+  enableDetail1: false,
+  enableDetail2: false,
+  detailInfoHoursTitle: '',
   detailInfoHours: '',
   order: 1,
   overlayOpacity: 100,
@@ -93,8 +125,14 @@ export default function AdminHero({ baseUrl, token }) {
       ctaText: screen.ctaText || '',
       ctaAction: screen.ctaAction || 'catalog',
       whatsappBadge: Boolean(screen.whatsappBadge),
+      detailInfoAddressTitle: screen.detailInfo?.addressTitle || '',
       detailInfoAddress: screen.detailInfo?.address || '',
+      detailInfoAddressIcon: screen.detailInfo?.addressIcon || (screen.order === 4 ? 'CreditCard' : 'MapPin'),
+      detailInfoHoursTitle: screen.detailInfo?.hoursTitle || '',
       detailInfoHours: screen.detailInfo?.hours || '',
+      detailInfoHoursIcon: screen.detailInfo?.hoursIcon || (screen.order === 4 ? 'Building' : 'Clock'),
+      enableDetail1: !!(screen.detailInfo?.address || screen.detailInfo?.addressTitle),
+      enableDetail2: !!(screen.detailInfo?.hours || screen.detailInfo?.hoursTitle),
       order: screen.order || 1,
       overlayOpacity: screen.overlayOpacity !== undefined ? Number(screen.overlayOpacity) : 100,
     });
@@ -122,9 +160,13 @@ export default function AdminHero({ baseUrl, token }) {
     ctaText: f.ctaText,
     ctaAction: f.ctaAction,
     whatsappBadge: Boolean(f.whatsappBadge),
-    detailInfo: f.detailInfoAddress || f.detailInfoHours ? {
-      address: f.detailInfoAddress,
-      hours: f.detailInfoHours
+    detailInfo: (f.enableDetail1 && (f.detailInfoAddress || f.detailInfoAddressTitle)) || (f.enableDetail2 && (f.detailInfoHours || f.detailInfoHoursTitle)) ? {
+      addressTitle: f.enableDetail1 ? f.detailInfoAddressTitle : '',
+      address: f.enableDetail1 ? f.detailInfoAddress : '',
+      addressIcon: f.enableDetail1 ? f.detailInfoAddressIcon : 'MapPin',
+      hoursTitle: f.enableDetail2 ? f.detailInfoHoursTitle : '',
+      hours: f.enableDetail2 ? f.detailInfoHours : '',
+      hoursIcon: f.enableDetail2 ? f.detailInfoHoursIcon : 'Clock'
     } : null,
     order: Number(f.order),
     overlayOpacity: Number(f.overlayOpacity),
@@ -374,22 +416,28 @@ export default function AdminHero({ baseUrl, token }) {
           {form.description || 'Descripción corta de la promoción o servicio...'}
         </p>
 
-        {(form.detailInfoAddress || form.detailInfoHours) && (
+        {(form.enableDetail1 || form.enableDetail2) && (
           <div className={heroStyles.infoBox}>
-            {form.detailInfoAddress && (
+            {form.enableDetail1 && (
               <div className={heroStyles.infoItem}>
-                {Number(form.order) === 4 ? <CreditCard className={heroStyles.infoIconIndigo} /> : <MapPin className={heroStyles.infoIconAccent} />}
+                {(() => {
+                  const IconComp = AVAILABLE_ICONS.find(i => i.id === form.detailInfoAddressIcon)?.component || MapPin;
+                  return <IconComp className={Number(form.order) === 4 ? heroStyles.infoIconIndigo : heroStyles.infoIconAccent} />;
+                })()}
                 <div>
-                  <p className={heroStyles.infoLabel}>{Number(form.order) === 4 ? "MERCADO PAGO" : "DIRECCIÓN"}</p>
+                  <p className={heroStyles.infoLabel}>{form.detailInfoAddressTitle || (Number(form.order) === 4 ? "MERCADO PAGO" : "DIRECCIÓN")}</p>
                   <p className={heroStyles.infoValue}>{form.detailInfoAddress}</p>
                 </div>
               </div>
             )}
-            {form.detailInfoHours && (
+            {form.enableDetail2 && (
               <div className={`${heroStyles.infoItem} ${heroStyles.infoItemBorder}`}>
-                {Number(form.order) === 4 ? <Building className={heroStyles.infoIconIndigo} /> : <Clock className={heroStyles.infoIconAccent} />}
+                {(() => {
+                  const IconComp = AVAILABLE_ICONS.find(i => i.id === form.detailInfoHoursIcon)?.component || Clock;
+                  return <IconComp className={Number(form.order) === 4 ? heroStyles.infoIconIndigo : heroStyles.infoIconAccent} />;
+                })()}
                 <div>
-                  <p className={heroStyles.infoLabel}>{Number(form.order) === 4 ? "TRANSFERENCIAS" : "HORARIOS"}</p>
+                  <p className={heroStyles.infoLabel}>{form.detailInfoHoursTitle || (Number(form.order) === 4 ? "TRANSFERENCIAS" : "HORARIOS")}</p>
                   <p className={heroStyles.infoValue}>{form.detailInfoHours}</p>
                 </div>
               </div>
@@ -588,14 +636,80 @@ export default function AdminHero({ baseUrl, token }) {
 
             <div className={styles.formSection}>
               <span className={styles.sectionTitle}>Caja de Información Adicional</span>
-              <div className={styles.formGroup}>
-                <label>Detalle 1 (Ej: Dirección)</label>
-                <input className={styles.input} value={form.detailInfoAddress} onChange={e => updateForm('detailInfoAddress', e.target.value)} />
+              
+              <div className={styles.toggleContainer} onClick={() => updateForm('enableDetail1', !form.enableDetail1)}>
+                <div className={styles.toggleLabel}>
+                  <span className={styles.toggleTitle}>Habilitar Detalle 1</span>
+                  <span className={styles.toggleDesc}>Muestra el primer bloque de información (ej. Dirección)</span>
+                </div>
+                <div className={`${styles.toggleSwitch} ${form.enableDetail1 ? styles.active : ''}`}></div>
               </div>
-              <div className={styles.formGroup}>
-                <label>Detalle 2 (Ej: Horarios)</label>
-                <input className={styles.input} value={form.detailInfoHours} onChange={e => updateForm('detailInfoHours', e.target.value)} />
+
+              {form.enableDetail1 && (
+                <div style={{ paddingLeft: '1rem', borderLeft: '2px solid rgba(255,255,255,0.1)', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className={styles.formGroup}>
+                    <label>Título Detalle 1 (Ej: Dirección)</label>
+                    <input className={styles.input} value={form.detailInfoAddressTitle} onChange={e => updateForm('detailInfoAddressTitle', e.target.value)} placeholder={Number(form.order) === 4 ? "MERCADO PAGO" : "DIRECCIÓN"} />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Valor Detalle 1</label>
+                    <input className={styles.input} value={form.detailInfoAddress} onChange={e => updateForm('detailInfoAddress', e.target.value)} />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Icono Detalle 1</label>
+                    <div className={styles.iconGrid}>
+                      {AVAILABLE_ICONS.map(icon => (
+                        <button
+                          key={icon.id}
+                          type="button"
+                          className={`${styles.iconOption} ${form.detailInfoAddressIcon === icon.id ? styles.iconOptionActive : ''}`}
+                          onClick={() => updateForm('detailInfoAddressIcon', icon.id)}
+                          title={icon.id}
+                        >
+                          <icon.component size={18} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.toggleContainer} onClick={() => updateForm('enableDetail2', !form.enableDetail2)}>
+                <div className={styles.toggleLabel}>
+                  <span className={styles.toggleTitle}>Habilitar Detalle 2</span>
+                  <span className={styles.toggleDesc}>Muestra el segundo bloque de información (ej. Horarios)</span>
+                </div>
+                <div className={`${styles.toggleSwitch} ${form.enableDetail2 ? styles.active : ''}`}></div>
               </div>
+
+              {form.enableDetail2 && (
+                <div style={{ paddingLeft: '1rem', borderLeft: '2px solid rgba(255,255,255,0.1)', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className={styles.formGroup}>
+                    <label>Título Detalle 2 (Ej: Horarios)</label>
+                    <input className={styles.input} value={form.detailInfoHoursTitle} onChange={e => updateForm('detailInfoHoursTitle', e.target.value)} placeholder={Number(form.order) === 4 ? "TRANSFERENCIAS" : "HORARIOS"} />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Valor Detalle 2</label>
+                    <input className={styles.input} value={form.detailInfoHours} onChange={e => updateForm('detailInfoHours', e.target.value)} />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Icono Detalle 2</label>
+                    <div className={styles.iconGrid}>
+                      {AVAILABLE_ICONS.map(icon => (
+                        <button
+                          key={icon.id}
+                          type="button"
+                          className={`${styles.iconOption} ${form.detailInfoHoursIcon === icon.id ? styles.iconOptionActive : ''}`}
+                          onClick={() => updateForm('detailInfoHoursIcon', icon.id)}
+                          title={icon.id}
+                        >
+                          <icon.component size={18} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className={styles.formSection}>

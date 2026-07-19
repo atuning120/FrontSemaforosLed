@@ -7,8 +7,29 @@ import {
   MapPin,
   CreditCard,
   Building,
-  Clock
+  Clock,
+  Phone,
+  Mail,
+  Star,
+  Info,
+  Truck,
+  Package,
+  ShieldCheck,
+  Award,
+  ThumbsUp,
+  Globe,
+  Headphones,
+  Zap,
+  Tag,
+  Gift,
+  Calendar,
+  CheckCircle
 } from 'lucide-react';
+
+const ICON_MAP = {
+  MapPin, Clock, CreditCard, Building, Phone, Mail, Star, Info, MessageCircle, Truck,
+  Package, ShieldCheck, Award, ThumbsUp, Globe, Headphones, Zap, Tag, Gift, Calendar, CheckCircle
+};
 import WhatsAppModal from './WhatsAppModal.jsx';
 import styles from './Hero.module.css';
 
@@ -185,32 +206,34 @@ export default function Hero() {
 
                       {slide.detailInfo && (
                         <div className={styles.infoBox}>
-                          <div className={styles.infoItem}>
-                            {slide.order === 4 ? (
-                              <CreditCard className={styles.infoIconIndigo} />
-                            ) : (
-                              <MapPin className={styles.infoIconAccent} />
-                            )}
-                            <div>
-                              <p className={styles.infoLabel}>
-                                {slide.order === 4 ? "MERCADO PAGO" : "DIRECCIÓN"}
-                              </p>
-                              <p className={styles.infoValue}>{slide.detailInfo.address}</p>
+                          {(slide.detailInfo.address || slide.detailInfo.addressTitle) && (
+                            <div className={styles.infoItem}>
+                              {(() => {
+                                const IconComp = ICON_MAP[slide.detailInfo.addressIcon] || (slide.order === 4 ? CreditCard : MapPin);
+                                return <IconComp className={slide.order === 4 ? styles.infoIconIndigo : styles.infoIconAccent} />;
+                              })()}
+                              <div>
+                                <p className={styles.infoLabel}>
+                                  {slide.detailInfo.addressTitle || (slide.order === 4 ? "MERCADO PAGO" : "DIRECCIÓN")}
+                                </p>
+                                <p className={styles.infoValue}>{slide.detailInfo.address}</p>
+                              </div>
                             </div>
-                          </div>
-                          <div className={`${styles.infoItem} ${styles.infoItemBorder}`}>
-                            {slide.order === 4 ? (
-                              <Building className={styles.infoIconIndigo} />
-                            ) : (
-                              <Clock className={styles.infoIconAccent} />
-                            )}
-                            <div>
-                              <p className={styles.infoLabel}>
-                                {slide.order === 4 ? "TRANSFERENCIAS" : "HORARIOS"}
-                              </p>
-                              <p className={styles.infoValue}>{slide.detailInfo.hours}</p>
+                          )}
+                          {(slide.detailInfo.hours || slide.detailInfo.hoursTitle) && (
+                            <div className={`${styles.infoItem} ${styles.infoItemBorder}`}>
+                              {(() => {
+                                const IconComp = ICON_MAP[slide.detailInfo.hoursIcon] || (slide.order === 4 ? Building : Clock);
+                                return <IconComp className={slide.order === 4 ? styles.infoIconIndigo : styles.infoIconAccent} />;
+                              })()}
+                              <div>
+                                <p className={styles.infoLabel}>
+                                  {slide.detailInfo.hoursTitle || (slide.order === 4 ? "TRANSFERENCIAS" : "HORARIOS")}
+                                </p>
+                                <p className={styles.infoValue}>{slide.detailInfo.hours}</p>
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                       )}
 
