@@ -5,7 +5,8 @@
 }
 
 .card {
-  background: rgba(30, 41, 59, 0.7); /* slate-800 with opacity */
+  background: rgba(30, 41, 59, 0.7);
+  /* slate-800 with opacity */
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 1.5rem;
@@ -61,24 +62,43 @@ select {
   background: rgba(0, 0, 0, 0.2);
   color: var(--text);
   transition: all 0.2s ease;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 
   &:focus {
     outline: none;
     border-color: var(--accent-500);
     background: rgba(0, 0, 0, 0.3);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 2px rgba(59, 130, 246, 0.2);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(59, 130, 246, 0.2);
   }
 }
 
 select {
-  option, optgroup {
+
+  option,
+  optgroup {
     color: #000000;
   }
 }
 
 .textarea {
   resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+  padding: 1rem;
+  border-radius: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 .checkbox {
@@ -95,9 +115,9 @@ select {
   display: flex;
   align-items: center;
   padding: 1rem 1.25rem;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 1rem;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   margin: 0.5rem 0;
   -webkit-tap-highlight-color: transparent;
 }
@@ -438,7 +458,7 @@ select {
 
     .productContent {
       padding: 0.75rem;
-      
+
       .productDesc {
         display: none;
       }
@@ -454,7 +474,9 @@ select {
       gap: 0.5rem;
     }
   }
-}.productBadges {
+}
+
+.productBadges {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
@@ -498,7 +520,7 @@ select {
 }
 
 .modalContent {
-  background: rgba(30, 41, 59, 0.85);
+  background: rgba(30, 41, 59, 0.98);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -517,15 +539,10 @@ select {
     grid-template-columns: 1fr;
   }
 
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
+    display: none;
   }
 }
 
@@ -559,7 +576,7 @@ select {
     width: 280px;
     pointer-events: none;
     transform: scale(1) !important;
-    
+
     &:hover {
       transform: none;
       box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
@@ -627,6 +644,11 @@ select {
 .modalFormArea {
   padding: 2.5rem;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   h3 {
     margin: 0 0 1.5rem;
@@ -796,7 +818,8 @@ select {
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.02);
 
-  &:hover, &:focus-within {
+  &:hover,
+  &:focus-within {
     border-color: var(--accent-500);
   }
 
@@ -859,16 +882,16 @@ select {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-.toggleSwitch input:checked + .slider {
+.toggleSwitch input:checked+.slider {
   background-color: var(--accent-500);
   border-color: var(--accent-500);
 }
 
-.toggleSwitch input:checked + .slider::before {
+.toggleSwitch input:checked+.slider::before {
   transform: translateX(1.6rem);
 }
 
-.toggleSwitch input:focus-visible + .slider {
+.toggleSwitch input:focus-visible+.slider {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1), 0 0 0 4px var(--accent-500);
 }
 
