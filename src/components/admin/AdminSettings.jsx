@@ -36,16 +36,16 @@ export default function AdminSettings({ baseUrl, token, onCredentialsUpdated }) 
         const response = await fetch(`${baseUrl}/api/settings`);
         if (!response.ok) throw new Error('Error al cargar configuraciones');
         const data = await response.json();
-        setStoreAddressName(data.storeAddressName || '');
-        setStoreAddressMapUrl(data.storeAddressMapUrl || '');
-        setEmailCorporativoTitle(data.emailCorporativoTitle || '');
-        setEmailCorporativo(data.emailCorporativo || '');
-        setEmailConsultasTitle(data.emailConsultasTitle || '');
-        setEmailConsultas(data.emailConsultas || '');
-        setWhatsappSoporteTitle(data.whatsappSoporteTitle || '');
-        setWhatsappSoporte(data.whatsappSoporte || '');
-        setWhatsappComercialTitle(data.whatsappComercialTitle || '');
-        setWhatsappComercial(data.whatsappComercial || '');
+        setStoreAddressName(data.storeAddressName || import.meta.env.VITE_STORE_ADDRESS || 'Maipú 942 Este, San Juan, Argentina');
+        setStoreAddressMapUrl(data.storeAddressMapUrl || 'https://maps.google.com/maps?q=-31.5402377,-68.5173167&hl=es&z=16&output=embed');
+        setEmailCorporativoTitle(data.emailCorporativoTitle || 'Email Corporativo');
+        setEmailCorporativo(data.emailCorporativo || import.meta.env.VITE_EMAIL || 'ventas@ledclean.ar');
+        setEmailConsultasTitle(data.emailConsultasTitle || 'Consultas y Ayuda');
+        setEmailConsultas(data.emailConsultas || import.meta.env.VITE_CONSULTAS_EMAIL || 'consultas@ledclean.ar');
+        setWhatsappSoporteTitle(data.whatsappSoporteTitle || 'WhatsApp Soporte');
+        setWhatsappSoporte(data.whatsappSoporte || import.meta.env.VITE_WHATSAPP_PHONE || '');
+        setWhatsappComercialTitle(data.whatsappComercialTitle || 'WhatsApp Comercial');
+        setWhatsappComercial(data.whatsappComercial || import.meta.env.VITE_WHATSAPP_SECOND || '');
       } catch (err) {
         setSettingsError(err.message);
       } finally {
@@ -55,7 +55,7 @@ export default function AdminSettings({ baseUrl, token, onCredentialsUpdated }) 
     loadSettings();
   }, [baseUrl]);
 
-  const handleSettingsSubmit = async (event) => {
+  const handleSettingsSubmit = async (event, formName) => {
     event.preventDefault();
     setIsUpdatingSettings(true);
     setSettingsError('');
@@ -87,7 +87,7 @@ export default function AdminSettings({ baseUrl, token, onCredentialsUpdated }) 
         throw new Error(data.error || 'Error al actualizar configuraciones');
       }
 
-      setSettingsSuccess('Configuraciones de la tienda actualizadas correctamente');
+      setSettingsSuccess(formName);
     } catch (err) {
       setSettingsError(err.message || 'Error al actualizar configuraciones');
     } finally {
@@ -144,7 +144,7 @@ export default function AdminSettings({ baseUrl, token, onCredentialsUpdated }) 
           </div>
         ) : (
           <>
-            <form className={styles.settingsCard} onSubmit={handleSettingsSubmit}>
+            <form className={styles.settingsCard} onSubmit={(e) => handleSettingsSubmit(e, 'address')}>
               <h2>Dirección y Mapa</h2>
               <p>Configura la dirección que aparece en el pie de página y en el mapa de ubicación.</p>
 
@@ -184,14 +184,14 @@ export default function AdminSettings({ baseUrl, token, onCredentialsUpdated }) 
 
               <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
                 {settingsError ? <div className={styles.error} style={{ marginBottom: '1rem' }}>{settingsError}</div> : null}
-                {settingsSuccess ? <div className={styles.success} style={{ marginBottom: '1rem' }}>{settingsSuccess}</div> : null}
+                {settingsSuccess === 'address' ? <div className={styles.success} style={{ marginBottom: '1rem' }}>Configuraciones actualizadas correctamente</div> : null}
                 <button type="submit" className={styles.primary} disabled={isUpdatingSettings} style={{ width: '100%' }}>
                   {isUpdatingSettings ? 'Guardando...' : 'Guardar Dirección'}
                 </button>
               </div>
             </form>
 
-            <form className={styles.settingsCard} onSubmit={handleSettingsSubmit}>
+            <form className={styles.settingsCard} onSubmit={(e) => handleSettingsSubmit(e, 'emails')}>
               <h2>Correos Electrónicos</h2>
               <p>Configura los correos de contacto para clientes.</p>
 
@@ -249,14 +249,14 @@ export default function AdminSettings({ baseUrl, token, onCredentialsUpdated }) 
 
               <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
                 {settingsError ? <div className={styles.error} style={{ marginBottom: '1rem' }}>{settingsError}</div> : null}
-                {settingsSuccess ? <div className={styles.success} style={{ marginBottom: '1rem' }}>{settingsSuccess}</div> : null}
+                {settingsSuccess === 'emails' ? <div className={styles.success} style={{ marginBottom: '1rem' }}>Configuraciones actualizadas correctamente</div> : null}
                 <button type="submit" className={styles.primary} disabled={isUpdatingSettings} style={{ width: '100%' }}>
                   {isUpdatingSettings ? 'Guardando...' : 'Guardar Correos'}
                 </button>
               </div>
             </form>
 
-            <form className={styles.settingsCard} onSubmit={handleSettingsSubmit}>
+            <form className={styles.settingsCard} onSubmit={(e) => handleSettingsSubmit(e, 'phones')}>
               <h2>WhatsApp y Teléfonos</h2>
               <p>Configura los números de atención rápida.</p>
 
@@ -314,7 +314,7 @@ export default function AdminSettings({ baseUrl, token, onCredentialsUpdated }) 
 
               <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
                 {settingsError ? <div className={styles.error} style={{ marginBottom: '1rem' }}>{settingsError}</div> : null}
-                {settingsSuccess ? <div className={styles.success} style={{ marginBottom: '1rem' }}>{settingsSuccess}</div> : null}
+                {settingsSuccess === 'phones' ? <div className={styles.success} style={{ marginBottom: '1rem' }}>Configuraciones actualizadas correctamente</div> : null}
                 <button type="submit" className={styles.primary} disabled={isUpdatingSettings} style={{ width: '100%' }}>
                   {isUpdatingSettings ? 'Guardando...' : 'Guardar Teléfonos'}
                 </button>
