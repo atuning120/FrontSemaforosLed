@@ -103,7 +103,13 @@ export default function App() {
 
   const handleQuoteWhatsApp = (product) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.farosledclean.com.ar';
-    const message = `Hola! Quiero cotizar este producto:\n\n${product.name}\nSKU: ${product.id}\nLink: ${origin}`;
+    const message = `Hola, me comunico para solicitar la cotización del siguiente artículo:
+
+- *${product.name}*
+
+Les agradecería que me brinden información sobre su precio y disponibilidad. ¡Muchas gracias!
+
+_Visto en: ${origin}_`;
     const encodedMessage = encodeURIComponent(message);
     const envPhone = import.meta.env.VITE_WHATSAPP_PHONE;
     const phoneNumber = envPhone ? envPhone.trim() : '5491100000000';

@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { Package, Image as ImageIcon, Settings, LogOut, Loader2, Menu } from 'lucide-react';
 import AdminLogin from './AdminLogin.jsx';
 import AdminProducts from './AdminProducts.jsx';
 import AdminSettings from './AdminSettings.jsx';
@@ -8,15 +9,16 @@ import styles from './AdminApp.module.css';
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const VIEWS = [
-  { key: 'products', label: 'Productos' },
-  { key: 'hero', label: 'Banner' },
-  { key: 'settings', label: 'Configuración' },
+  { key: 'products', label: 'Productos', icon: Package },
+  { key: 'hero', label: 'Banner', icon: ImageIcon },
+  { key: 'settings', label: 'Configuración', icon: Settings },
 ];
 
 export default function AdminApp() {
   const [token, setToken] = useState(() => localStorage.getItem('adminToken') || '');
   const [view, setView] = useState('products');
   const [isValidating, setIsValidating] = useState(!!token);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -59,10 +61,9 @@ export default function AdminApp() {
 
   if (isValidating) {
     return (
-      <div className={styles.admin}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'white' }}>
-          Verificando credenciales...
-        </div>
+      <div className={styles.adminLoading}>
+        <Loader2 className={styles.spinner} size={48} />
+        <p>Verificando credenciales...</p>
       </div>
     );
   }
@@ -72,43 +73,97 @@ export default function AdminApp() {
   }
 
   return (
-    <div className={styles.admin}>
-      <header className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>Panel administrador</p>
-          <h1>{viewLabel}</h1>
-        </div>
-        <div className={styles.headerActions}>
-          <button type="button" className={styles.logout} onClick={handleLogout}>
-            Salir
+    <div className={styles.adminLayout}>
+      <aside className={`${styles.sidebar} ${isSidebarCollapsed ? styles.sidebarCollapsed : ''}`}>
+        <div className={styles.sidebarHeader}>
+          {!isSidebarCollapsed && (
+            <div className={styles.sidebarTitle}>
+              <h2>SEMAFOROS <span>LED</span></h2>
+              <p>Panel de Control</p>
+            </div>
+          )}
+          <button 
+            className={styles.collapseBtn} 
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            title={isSidebarCollapsed ? "Expandir" : "Contraer"}
+          >
+            <Menu size={20} />
           </button>
-          <nav className={styles.nav}>
-            {VIEWS.map((item) => (
+        </div>
+
+        <nav className={styles.nav}>
+          {VIEWS.map((item) => {
+            const Icon = item.icon;
+            const isActive = view === item.key;
+            return (
               <button
                 key={item.key}
                 type="button"
                 onClick={() => setView(item.key)}
-                className={`${styles.navButton} ${view === item.key ? styles.navButtonActive : ''
-                  }`}
+                className={`${styles.navButton} ${isActive ? styles.navButtonActive : ''}`}
               >
-                {item.label}
+                <Icon className={styles.navIcon} size={20} />
+                {!isSidebarCollapsed && <span className={styles.navLabel}>{item.label}</span>}
+                {isSidebarCollapsed && <span className={styles.tooltip}>{item.label}</span>}
               </button>
-            ))}
-          </nav>
-        </div>
-      </header>
+            );
+          })}
+        </nav>
 
-      <main className={styles.main}>
-        {view === 'products' && (
-          <AdminProducts baseUrl={BASE_URL} token={token} />
-        )}
-        {view === 'hero' && (
-          <AdminHero baseUrl={BASE_URL} token={token} />
-        )}
-        {view === 'settings' && (
-          <AdminSettings baseUrl={BASE_URL} token={token} onCredentialsUpdated={handleLogin} />
-        )}
-      </main>
+        <div className={styles.sidebarFooter}>
+          <button type="button" className={styles.logout} onClick={handleLogout}>
+            <LogOut size={20} />
+            {!isSidebarCollapsed && <span>Cerrar Sesión</span>}
+            {isSidebarCollapsed && <span className={styles.tooltip}>Cerrar Sesión</span>}
+          </button>
+        </div>
+      </aside>
+
+      <div className={styles.mainContent}>
+        <header className={styles.topbar}>
+          <div className={styles.topbarLeft}>
+            <p className={styles.eyebrow}>Panel administrador</p>
+            <h1>{viewLabel}</h1>
+          </div>
+        </header>
+
+        <main className={styles.main}>
+          <div className={`${styles.mainInner} ${view === 'hero' ? styles.mainInnerFull : ''}`}>
+            {view === 'products' && (
+              <AdminProducts baseUrl={BASE_URL} token={token} />
+            )}
+            {view === 'hero' && (
+              <AdminHero baseUrl={BASE_URL} token={token} />
+            )}
+            {view === 'settings' && (
+              <AdminSettings baseUrl={BASE_URL} token={token} onCredentialsUpdated={handleLogin} />
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className={styles.mobileNav}>
+        {VIEWS.map((item) => {
+          const Icon = item.icon;
+          const isActive = view === item.key;
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setView(item.key)}
+              className={`${styles.mobileNavButton} ${isActive ? styles.mobileNavButtonActive : ''}`}
+            >
+              <Icon size={22} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+        <button type="button" className={styles.mobileNavButton} onClick={handleLogout}>
+          <LogOut size={22} />
+          <span>Salir</span>
+        </button>
+      </nav>
     </div>
   );
 }

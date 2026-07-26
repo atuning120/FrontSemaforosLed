@@ -9,6 +9,16 @@ import WhatsAppPopover from './WhatsAppPopover';
 export default function Footer() {
   const [storeAddress, setStoreAddress] = useState(import.meta.env.VITE_STORE_ADDRESS || 'Maipú 942 Este, San Juan, Argentina');
   const [mapUrl, setMapUrl] = useState('https://maps.google.com/maps?q=-31.5402377,-68.5173167&hl=es&z=16&output=embed');
+  const [contactInfo, setContactInfo] = useState({
+    emailCorporativoTitle: 'Email Corporativo',
+    emailCorporativo: import.meta.env.VITE_EMAIL || 'ventas@ledclean.ar',
+    emailConsultasTitle: 'Consultas y Ayuda',
+    emailConsultas: import.meta.env.VITE_CONSULTAS_EMAIL || 'consultas@ledclean.ar',
+    whatsappSoporteTitle: 'WhatsApp Soporte',
+    whatsappSoporte: import.meta.env.VITE_WHATSAPP_PHONE || '',
+    whatsappComercialTitle: 'WhatsApp Comercial',
+    whatsappComercial: import.meta.env.VITE_WHATSAPP_SECOND || ''
+  });
 
   useEffect(() => {
     const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -17,6 +27,16 @@ export default function Footer() {
       .then(data => {
         if (data.storeAddressName) setStoreAddress(data.storeAddressName);
         if (data.storeAddressMapUrl) setMapUrl(data.storeAddressMapUrl);
+        setContactInfo(prev => ({
+          emailCorporativoTitle: data.emailCorporativoTitle || prev.emailCorporativoTitle,
+          emailCorporativo: data.emailCorporativo || prev.emailCorporativo,
+          emailConsultasTitle: data.emailConsultasTitle || prev.emailConsultasTitle,
+          emailConsultas: data.emailConsultas || prev.emailConsultas,
+          whatsappSoporteTitle: data.whatsappSoporteTitle || prev.whatsappSoporteTitle,
+          whatsappSoporte: data.whatsappSoporte || prev.whatsappSoporte,
+          whatsappComercialTitle: data.whatsappComercialTitle || prev.whatsappComercialTitle,
+          whatsappComercial: data.whatsappComercial || prev.whatsappComercial
+        }));
       })
       .catch(err => console.error('Error loading settings:', err));
   }, []);
@@ -54,15 +74,15 @@ export default function Footer() {
               <ul>
                 <li>
                   <ContactPopover
-                    targetEmail={import.meta.env.VITE_EMAIL || 'ventas@ledclean.ar'}
+                    targetEmail={contactInfo.emailCorporativo}
                     buttonContent={
                       <div className={styles.contactCard} style={{ textDecoration: 'none' }}>
                         <div className={`${styles.iconContainer} ${styles.isAccent}`}>
                           <Mail className={styles.icon} />
                         </div>
                         <div>
-                          <span>Email Corporativo</span>
-                          <strong style={{ textTransform: 'lowercase' }}>{import.meta.env.VITE_EMAIL || 'ventas@ledclean.ar'}</strong>
+                          <span>{contactInfo.emailCorporativoTitle}</span>
+                          <strong style={{ textTransform: 'lowercase' }}>{contactInfo.emailCorporativo}</strong>
                         </div>
                       </div>
                     }
@@ -72,15 +92,15 @@ export default function Footer() {
               <ul>
                 <li>
                   <ContactPopover
-                    targetEmail={import.meta.env.VITE_CONSULTAS_EMAIL || 'consultas@ledclean.ar'}
+                    targetEmail={contactInfo.emailConsultas}
                     buttonContent={
                       <div className={styles.contactCard} style={{ textDecoration: 'none' }}>
                         <div className={`${styles.iconContainer} ${styles.isAccent}`}>
                           <Mail className={styles.icon} />
                         </div>
                         <div>
-                          <span>Consultas y Ayuda</span>
-                          <strong style={{ textTransform: 'lowercase' }}>{import.meta.env.VITE_CONSULTAS_EMAIL || 'consultas@ledclean.ar'}</strong>
+                          <span>{contactInfo.emailConsultasTitle}</span>
+                          <strong style={{ textTransform: 'lowercase' }}>{contactInfo.emailConsultas}</strong>
                         </div>
                       </div>
                     }
@@ -90,15 +110,15 @@ export default function Footer() {
               <ul>
                 <li>
                   <WhatsAppPopover 
-                    phoneNumber={import.meta.env.VITE_WHATSAPP_PHONE}
+                    phoneNumber={contactInfo.whatsappSoporte}
                     buttonContent={
                       <div className={styles.contactCard} style={{ textDecoration: 'none' }}>
                         <div className={`${styles.iconContainer} ${styles.isGreen}`}>
                           <MessageCircle className={styles.icon} />
                         </div>
                         <div>
-                          <span>WhatsApp Soporte</span>
-                          <strong>+{import.meta.env.VITE_WHATSAPP_PHONE}</strong>
+                          <span>{contactInfo.whatsappSoporteTitle}</span>
+                          <strong>+{contactInfo.whatsappSoporte}</strong>
                         </div>
                       </div>
                     }
@@ -108,15 +128,15 @@ export default function Footer() {
               <ul>
                 <li>
                   <WhatsAppPopover 
-                    phoneNumber={import.meta.env.VITE_WHATSAPP_SECOND}
+                    phoneNumber={contactInfo.whatsappComercial}
                     buttonContent={
                       <div className={styles.contactCard} style={{ textDecoration: 'none' }}>
                         <div className={`${styles.iconContainer} ${styles.isGreen}`}>
                           <MessageCircle className={styles.icon} />
                         </div>
                         <div>
-                          <span>WhatsApp Comercial</span>
-                          <strong>+{import.meta.env.VITE_WHATSAPP_SECOND}</strong>
+                          <span>{contactInfo.whatsappComercialTitle}</span>
+                          <strong>+{contactInfo.whatsappComercial}</strong>
                         </div>
                       </div>
                     }
