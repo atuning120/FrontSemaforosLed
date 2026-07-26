@@ -101,19 +101,20 @@ export default function AdminApp() {
                 type="button"
                 onClick={() => setView(item.key)}
                 className={`${styles.navButton} ${isActive ? styles.navButtonActive : ''}`}
-                title={item.label}
               >
                 <Icon className={styles.navIcon} size={20} />
                 {!isSidebarCollapsed && <span className={styles.navLabel}>{item.label}</span>}
+                {isSidebarCollapsed && <span className={styles.tooltip}>{item.label}</span>}
               </button>
             );
           })}
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <button type="button" className={styles.logout} onClick={handleLogout} title="Cerrar Sesión">
+          <button type="button" className={styles.logout} onClick={handleLogout}>
             <LogOut size={20} />
             {!isSidebarCollapsed && <span>Cerrar Sesión</span>}
+            {isSidebarCollapsed && <span className={styles.tooltip}>Cerrar Sesión</span>}
           </button>
         </div>
       </aside>
