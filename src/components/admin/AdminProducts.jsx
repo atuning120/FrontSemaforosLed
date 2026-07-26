@@ -589,6 +589,9 @@ export default function AdminProducts({ baseUrl, token }) {
             </button>
           </div>
         )}
+      </div>
+
+
 
         {editingSku ? (
           <div className={styles.modalOverlay} onClick={cancelEdit}>
@@ -1420,7 +1423,6 @@ export default function AdminProducts({ baseUrl, token }) {
             </div>
           </div>
         ) : null}
-      </div>
     </section>
   );
 }
