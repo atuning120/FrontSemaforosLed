@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Trash, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash, Star, ArrowUpDown } from 'lucide-react';
 import Filters from '../Filters.jsx';
 import styles from './AdminProducts.module.css';
 
@@ -15,6 +15,7 @@ const emptyForm = {
   imagenes: [],
   destacado: false,
   id_catalogo: '',
+  orden: 0,
   tamano_imagen: 'default',
   upload_mode: 'upload',
 };
@@ -103,7 +104,17 @@ export default function AdminProducts({ baseUrl, token }) {
         throw new Error('Error al cargar productos');
       }
       const data = await response.json();
-      setProducts(data);
+      const sorted = Array.isArray(data)
+        ? [...data].sort((a, b) => {
+            const ordA = Number.isFinite(Number(a.orden)) ? Number(a.orden) : 0;
+            const ordB = Number.isFinite(Number(b.orden)) ? Number(b.orden) : 0;
+            if (ordA !== ordB) return ordA - ordB;
+            const nameA = (a.nombre || '').toString().toLowerCase();
+            const nameB = (b.nombre || '').toString().toLowerCase();
+            return nameA.localeCompare(nameB);
+          })
+        : data;
+      setProducts(sorted);
     } catch (err) {
       setError(err.message || 'Error al cargar productos');
     } finally {
@@ -129,6 +140,8 @@ export default function AdminProducts({ baseUrl, token }) {
   const toPayload = (form) => {
     const idCatalogo = form.id_catalogo === '' ? undefined : Number(form.id_catalogo);
 
+    const orden = form.orden === '' || form.orden === undefined ? 0 : Number(form.orden);
+
     return {
       sku: form.sku.trim(),
       nombre: form.nombre.trim(),
@@ -140,6 +153,7 @@ export default function AdminProducts({ baseUrl, token }) {
       destacado: Boolean(form.destacado),
       id_catalogo: idCatalogo,
       tamano_imagen: form.tamano_imagen || 'default',
+      orden: Number.isFinite(orden) ? orden : 0,
     };
   };
 
@@ -224,6 +238,7 @@ export default function AdminProducts({ baseUrl, token }) {
       destacado: Boolean(product.destacado),
       id_catalogo: product.id_catalogo ?? '',
       tamano_imagen: product.tamano_imagen || 'default',
+      orden: product.orden !== undefined && product.orden !== null ? Number(product.orden) : 0,
       upload_mode: 'upload',
     });
   };
@@ -513,7 +528,16 @@ export default function AdminProducts({ baseUrl, token }) {
                 </div>
 
                 <div className={styles.productContent}>
-                  <span className={styles.productTag}>{product.categoria}</span>
+                  <div className={styles.productMetaRow}>
+                    <span className={styles.productTag}>{product.categoria}</span>
+                    <span
+                      className={styles.orderBadge}
+                      title="Orden de visualización (menor número se muestra primero)"
+                    >
+                      <ArrowUpDown size={12} />
+                      Orden: #{product.orden !== undefined && product.orden !== null ? product.orden : 0}
+                    </span>
+                  </div>
                   <div className={styles.productHeadline}>
                     <h4 className={styles.productTitle}>{product.nombre}</h4>
                   </div>
@@ -756,13 +780,26 @@ export default function AdminProducts({ baseUrl, token }) {
 
 
                   <label className={styles.label}>
-                    ID Catalogo
+                    <span className={styles.labelWithIcon}>
+                      <ArrowUpDown size={14} className={styles.labelIcon} />
+                      Orden de visualización
+                    </span>
                     <input
                       type="number"
-                      value={editForm.id_catalogo}
+                      value={editForm.orden ?? 0}
+                      onChange={(event) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          orden: event.target.value === '' ? '' : Number(event.target.value),
+                        }))
+                      }
                       className={styles.input}
-                      disabled
+                      placeholder="Ej: 0, 1, 2..."
+                      min="0"
                     />
+                    <span className={styles.helperText}>
+                      Menor número se muestra primero (ej: 0, 1, 2...)
+                    </span>
                   </label>
 
                   <div className={styles.checkboxGroup}>
@@ -1167,16 +1204,26 @@ export default function AdminProducts({ baseUrl, token }) {
 
 
                   <label className={styles.label}>
-                    ID Catalogo
+                    <span className={styles.labelWithIcon}>
+                      <ArrowUpDown size={14} className={styles.labelIcon} />
+                      Orden de visualización
+                    </span>
                     <input
                       type="number"
-                      value={createForm.id_catalogo}
+                      value={createForm.orden ?? 0}
                       onChange={(event) =>
-                        setCreateForm((prev) => ({ ...prev, id_catalogo: event.target.value }))
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          orden: event.target.value === '' ? '' : Number(event.target.value),
+                        }))
                       }
                       className={styles.input}
-                      readOnly
+                      placeholder="Ej: 0, 1, 2..."
+                      min="0"
                     />
+                    <span className={styles.helperText}>
+                      Menor número se muestra primero (ej: 0, 1, 2...)
+                    </span>
                   </label>
 
                   <div className={styles.checkboxGroup}>
