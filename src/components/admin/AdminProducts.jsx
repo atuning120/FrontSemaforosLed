@@ -42,6 +42,15 @@ const getNextCatalogId = (items) => {
   return Math.max(...ids) + 1;
 };
 
+const getNextOrder = (items) => {
+  const ords = (items || [])
+    .map((item) => Number(item.orden))
+    .filter((value) => Number.isFinite(value));
+
+  if (ords.length === 0) return 1;
+  return Math.max(...ords) + 1;
+};
+
 const formatImageUrl = (url) => {
   if (!url) return '';
   const trimmed = url.trim();
@@ -140,7 +149,8 @@ export default function AdminProducts({ baseUrl, token }) {
   const toPayload = (form) => {
     const idCatalogo = form.id_catalogo === '' ? undefined : Number(form.id_catalogo);
 
-    const orden = form.orden === '' || form.orden === undefined ? 0 : Number(form.orden);
+    const defaultOrder = getNextOrder(products);
+    const orden = form.orden === '' || form.orden === undefined ? defaultOrder : Number(form.orden);
 
     return {
       sku: form.sku.trim(),
@@ -153,7 +163,7 @@ export default function AdminProducts({ baseUrl, token }) {
       destacado: Boolean(form.destacado),
       id_catalogo: idCatalogo,
       tamano_imagen: form.tamano_imagen || 'default',
-      orden: Number.isFinite(orden) ? orden : 0,
+      orden: Number.isFinite(orden) ? orden : defaultOrder,
     };
   };
 
@@ -207,9 +217,11 @@ export default function AdminProducts({ baseUrl, token }) {
     setSelectedImageIdxCreate(null);
     setSelectedImageIdxEdit(null);
     const nextCatalogId = getNextCatalogId(products);
+    const nextOrder = getNextOrder(products);
     setCreateForm((prev) => ({
       ...emptyForm,
       id_catalogo: nextCatalogId,
+      orden: nextOrder,
       sku: prev?.sku || '',
     }));
     setEditingSku('');
@@ -1249,7 +1261,7 @@ export default function AdminProducts({ baseUrl, token }) {
                       min="0"
                     />
                     <span className={styles.helperText}>
-                      Menor número se muestra primero (ej: 0, 1, 2...)
+                      Por defecto se sitúa al final del catálogo (orden: {createForm.orden ?? 0}). Menor número se muestra primero.
                     </span>
                   </label>
 

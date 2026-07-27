@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { X, MessageCircle } from 'lucide-react';
+import ProductImageZoom from './ProductImageZoom.jsx';
 import styles from './ProductModal.module.css';
 
 export default function ProductModal({ product, onClose, onQuote }) {
@@ -37,19 +38,13 @@ export default function ProductModal({ product, onClose, onQuote }) {
 
         <div className={styles.media}>
           {images.length > 0 ? (
-            <div className={styles.mainImageContainer}>
-              <img
-                src={images[currentImageIndex]}
-                alt={`${product.name} - Imagen principal`}
-                referrerPolicy="no-referrer"
-                className={styles.mainImage}
-              />
-              {product.raw?.destacado && (
-                <div className={styles.badges}>
-                  <span className={styles.badgeFeatured}>Destacado</span>
-                </div>
-              )}
-            </div>
+            <ProductImageZoom
+              key={currentImageIndex}
+              src={images[currentImageIndex]}
+              alt={`${product.name} - Imagen principal`}
+              destacado={product.raw?.destacado}
+              oferta={product.raw?.oferta}
+            />
           ) : (
             <div className={styles.mainImageContainer}>
               <div className={styles.noImage}>No hay imagen</div>
