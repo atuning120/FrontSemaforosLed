@@ -44,8 +44,16 @@ export default function App() {
             images: item.imagenes || [],
             featured: Boolean(item.destacado),
             tamano_imagen: item.tamano_imagen || 'default',
+            orden: Number.isFinite(Number(item.orden)) ? Number(item.orden) : 0,
             raw: item,
           };
+        });
+
+        mapped.sort((a, b) => {
+          if (a.orden !== b.orden) {
+            return a.orden - b.orden;
+          }
+          return (a.name || '').localeCompare(b.name || '');
         });
 
         if (isMounted) {
