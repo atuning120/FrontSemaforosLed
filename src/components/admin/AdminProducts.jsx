@@ -667,7 +667,17 @@ export default function AdminProducts({ baseUrl, token }) {
                 {/* INICIO GALERIA */}
                 {(editForm.imagenes?.length > 0 || editForm.imagen) && (
                   <div className={styles.galleryContainer}>
-                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Galería de imágenes</p>
+                    <div className={styles.galleryHeaderRow}>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                        Galería de imágenes
+                      </p>
+                      {selectedImageIdxEdit !== null && (
+                        <span className={styles.selectedImageGreenBadge}>
+                          <span className={styles.greenPulseDot}></span>
+                          Imagen seleccionada
+                        </span>
+                      )}
+                    </div>
                     <div className={styles.galleryList}>
                       {(editForm.imagenes?.length > 0 ? editForm.imagenes : [editForm.imagen]).filter(img => img && img.trim() !== '').map((img, idx) => {
                         const isMain = img === editForm.imagen;
@@ -821,9 +831,16 @@ export default function AdminProducts({ baseUrl, token }) {
 
                   <div className={styles.label} style={{ gridColumn: '1 / -1' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <span style={{ fontWeight: 600, color: selectedImageIdxEdit !== null ? '#4da6ff' : 'inherit' }}>
-                        {selectedImageIdxEdit !== null ? 'Modificar imagen seleccionada' : 'Agregar nueva imagen'}
-                      </span>
+                      {selectedImageIdxEdit !== null ? (
+                        <span className={styles.selectedImageGreenBadge}>
+                          <span className={styles.greenPulseDot}></span>
+                          Imagen seleccionada
+                        </span>
+                      ) : (
+                        <span style={{ fontWeight: 600, color: 'inherit' }}>
+                          Agregar nueva imagen
+                        </span>
+                      )}
                       <div className={styles.switchContainer}>
                         <button
                           type="button"
@@ -1076,7 +1093,17 @@ export default function AdminProducts({ baseUrl, token }) {
                 {/* INICIO GALERIA */}
                 {(createForm.imagenes?.length > 0 || createForm.imagen) && (
                   <div className={styles.galleryContainer}>
-                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Galería de imágenes</p>
+                    <div className={styles.galleryHeaderRow}>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                        Galería de imágenes
+                      </p>
+                      {selectedImageIdxCreate !== null && (
+                        <span className={styles.selectedImageGreenBadge}>
+                          <span className={styles.greenPulseDot}></span>
+                          Imagen seleccionada
+                        </span>
+                      )}
+                    </div>
                     <div className={styles.galleryList}>
                       {(createForm.imagenes?.length > 0 ? createForm.imagenes : [createForm.imagen]).filter(img => img && img.trim() !== '').map((img, idx) => {
                         const isMain = img === createForm.imagen;
@@ -1245,9 +1272,16 @@ export default function AdminProducts({ baseUrl, token }) {
 
                   <div className={styles.label} style={{ gridColumn: '1 / -1' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <span style={{ fontWeight: 600, color: selectedImageIdxCreate !== null ? '#4da6ff' : 'inherit' }}>
-                        {selectedImageIdxCreate !== null ? 'Modificar imagen seleccionada' : 'Agregar nueva imagen'}
-                      </span>
+                      {selectedImageIdxCreate !== null ? (
+                        <span className={styles.selectedImageGreenBadge}>
+                          <span className={styles.greenPulseDot}></span>
+                          Imagen seleccionada
+                        </span>
+                      ) : (
+                        <span style={{ fontWeight: 600, color: 'inherit' }}>
+                          Agregar nueva imagen
+                        </span>
+                      )}
                       <div className={styles.switchContainer}>
                         <button
                           type="button"
