@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Filters from './Filters.jsx';
@@ -20,11 +20,32 @@ export default function ProductCatalog({
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const isInitialMount = useRef(true);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeCategory]);
+
+  const scrollToCatalog = () => {
+    const catalogElement = document.getElementById('catalog');
+    if (catalogElement) {
+      const offset = 80;
+      const top = catalogElement.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  };
+
+  // Scroll to top of catalog after page changes in DOM
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    requestAnimationFrame(() => {
+      scrollToCatalog();
+    });
+  }, [currentPage]);
 
   const totalPages = Math.max(
     1,
@@ -47,13 +68,11 @@ export default function ProductCatalog({
   }, [filteredProducts, clampedCurrent]);
 
   const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-    const catalogElement = document.getElementById('catalog');
-    if (catalogElement) {
-      const offset = 80;
-      const top = catalogElement.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top, behavior: 'smooth' });
+    if (newPage === currentPage) {
+      scrollToCatalog();
+      return;
     }
+    setCurrentPage(newPage);
   };
 
   return (
