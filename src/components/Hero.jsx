@@ -190,10 +190,12 @@ export default function Hero() {
                     </div>
 
                     <div className={styles.slideContent}>
-                      <div className={`${styles.badge} ${styles[slide.badgeClass] || styles.badgeCyan}`}>
-                        <span className={styles.badgeDot}></span>
-                        {slide.badge}
-                      </div>
+                      {slide.showBadge !== false && (
+                        <div className={`${styles.badge} ${styles[slide.badgeClass] || styles.badgeCyan}`}>
+                          <span className={styles.badgeDot}></span>
+                          {slide.badge}
+                        </div>
+                      )}
 
                       <h2 className={styles.title}>
                         {slide.titlePrimary} <br className={styles.hideMobile} />

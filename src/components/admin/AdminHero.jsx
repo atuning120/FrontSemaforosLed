@@ -40,6 +40,7 @@ polyfill({
 window.addEventListener('touchmove', function () { }, { passive: false });
 
 const emptyForm = {
+  showBadge: true,
   badge: '',
   badgeClass: 'badgeCyan',
   titlePrimary: '',
@@ -116,6 +117,7 @@ export default function AdminHero({ baseUrl, token }) {
 
     setSelectedId(screen._id);
     setForm({
+      showBadge: screen.showBadge !== false,
       badge: screen.badge || '',
       badgeClass: screen.badgeClass || 'badgeCyan',
       titlePrimary: screen.titlePrimary || '',
@@ -151,6 +153,7 @@ export default function AdminHero({ baseUrl, token }) {
   };
 
   const toPayload = (f) => ({
+    showBadge: f.showBadge !== false,
     badge: f.badge,
     badgeClass: f.badgeClass,
     titlePrimary: f.titlePrimary,
@@ -417,14 +420,16 @@ export default function AdminHero({ baseUrl, token }) {
           gap: previewDevice === 'mobile' ? '1.1rem' : '1.5rem'
         }}
       >
-        <div className={`${heroStyles.badge} ${heroStyles[form.badgeClass] || heroStyles.badgeCyan}`} style={{
-          alignSelf: 'flex-start',
-          fontSize: previewDevice === 'mobile' ? '0.62rem' : '0.65rem',
-          padding: previewDevice === 'mobile' ? '0.3rem 0.85rem' : '0.375rem 1rem'
-        }}>
-          <span className={heroStyles.badgeDot}></span>
-          {form.badge || 'Etiqueta'}
-        </div>
+        {form.showBadge !== false && (
+          <div className={`${heroStyles.badge} ${heroStyles[form.badgeClass] || heroStyles.badgeCyan}`} style={{
+            alignSelf: 'flex-start',
+            fontSize: previewDevice === 'mobile' ? '0.62rem' : '0.65rem',
+            padding: previewDevice === 'mobile' ? '0.3rem 0.85rem' : '0.375rem 1rem'
+          }}>
+            <span className={heroStyles.badgeDot}></span>
+            {form.badge || 'Etiqueta'}
+          </div>
+        )}
         <h2
           className={heroStyles.title}
           style={{
@@ -806,29 +811,42 @@ export default function AdminHero({ baseUrl, token }) {
 
             <div className={styles.formSection}>
               <span className={styles.sectionTitle}>Insignia Superior</span>
-              <div className={styles.formGroup}>
-                <label>Texto de la etiqueta</label>
-                <input className={styles.input} value={form.badge} onChange={e => updateForm('badge', e.target.value)} placeholder="Ej: Catálogo Digital" />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Color</label>
-                <div className={styles.colorPicker}>
-                  {colorOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      className={`${styles.colorOption} ${form.badgeClass === opt.value ? styles.colorOptionActive : ''}`}
-                      onClick={() => updateForm('badgeClass', opt.value)}
-                    >
-                      <span className={styles.colorDot} style={{ backgroundColor: opt.color, color: opt.color }}></span>
-                      <div className={styles.colorText}>
-                        <span className={styles.colorName}>{opt.label}</span>
-                        <span className={styles.colorDesc}>{opt.desc}</span>
-                      </div>
-                    </button>
-                  ))}
+
+              <div className={styles.toggleContainer} onClick={() => updateForm('showBadge', form.showBadge === false ? true : false)}>
+                <div className={styles.toggleLabel}>
+                  <span className={styles.toggleTitle}>Mostrar Insignia Superior</span>
+                  <span className={styles.toggleDesc}>Activa o desactiva la insignia sobre el título principal</span>
                 </div>
+                <div className={`${styles.toggleSwitch} ${form.showBadge !== false ? styles.active : ''}`}></div>
               </div>
+
+              {form.showBadge !== false && (
+                <div style={{ paddingLeft: '1rem', borderLeft: '2px solid rgba(255,255,255,0.1)', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className={styles.formGroup}>
+                    <label>Texto de la etiqueta</label>
+                    <input className={styles.input} value={form.badge} onChange={e => updateForm('badge', e.target.value)} placeholder="Ej: Catálogo Digital" />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Color</label>
+                    <div className={styles.colorPicker}>
+                      {colorOptions.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={`${styles.colorOption} ${form.badgeClass === opt.value ? styles.colorOptionActive : ''}`}
+                          onClick={() => updateForm('badgeClass', opt.value)}
+                        >
+                          <span className={styles.colorDot} style={{ backgroundColor: opt.color, color: opt.color }}></span>
+                          <div className={styles.colorText}>
+                            <span className={styles.colorName}>{opt.label}</span>
+                            <span className={styles.colorDesc}>{opt.desc}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className={styles.formSection}>
