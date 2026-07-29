@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import styles from './WhatsAppModal.module.css';
 
 export default function WhatsAppModal({ isOpen, onClose }) {
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.farosledclean.com.ar';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://semaforosled.com.ar';
   const predefinedMessage = `Hola! Estoy viendo tu catalogo y quiero consultar.\n\nLink: ${origin}`;
 
   const handleOpenWhatsApp = () => {

@@ -110,7 +110,7 @@ export default function App() {
   );
 
   const handleQuoteWhatsApp = (product) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.farosledclean.com.ar';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://semaforosled.com.ar';
     const message = `Hola, me comunico para solicitar la cotización del siguiente artículo:
 
 - *${product.name}*
