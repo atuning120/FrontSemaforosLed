@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash, Save, MessageCircle, MapPin, CreditCard, Building, Clock, Layout, ZoomIn, ZoomOut, Maximize, Star, Video, Phone, Mail, Info, Truck, Package, ShieldCheck, Award, ThumbsUp, Globe, Headphones, Zap, Tag, Gift, Calendar, CheckCircle } from 'lucide-react';
+import { Plus, Trash, Save, MessageCircle, MapPin, CreditCard, Building, Clock, Layout, ZoomIn, ZoomOut, Maximize, Star, Video, Phone, Mail, Info, Truck, Package, ShieldCheck, Award, ThumbsUp, Globe, Headphones, Zap, Tag, Gift, Calendar, CheckCircle, Monitor, Smartphone } from 'lucide-react';
 
 const AVAILABLE_ICONS = [
   { id: 'MapPin', component: MapPin },
@@ -76,6 +76,7 @@ export default function AdminHero({ baseUrl, token }) {
   const [draggedScreenId, setDraggedScreenId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [previewDevice, setPreviewDevice] = useState('desktop'); // 'desktop' | 'mobile'
 
   const headers = useMemo(
     () => ({
@@ -400,26 +401,71 @@ export default function AdminHero({ baseUrl, token }) {
         />
         <div className={heroStyles.slidePattern}></div>
         <div className={heroStyles.slideGradientBottom} style={{ opacity: form.overlayOpacity !== undefined ? form.overlayOpacity / 100 : 1 }}></div>
-        <div className={heroStyles.slideGradientRight} style={{ opacity: form.overlayOpacity !== undefined ? form.overlayOpacity / 100 : 1 }}></div>
+        <div className={heroStyles.slideGradientRight} style={{
+          opacity: form.overlayOpacity !== undefined ? form.overlayOpacity / 100 : 1,
+          display: previewDevice === 'mobile' ? 'none' : 'block'
+        }}></div>
       </div>
 
-      <div className={heroStyles.slideContent} style={{ padding: 'clamp(2rem, 5vw, 4rem)', margin: 0, justifyContent: 'center' }}>
-        <div className={`${heroStyles.badge} ${heroStyles[form.badgeClass] || heroStyles.badgeCyan}`} style={{ alignSelf: 'flex-start' }}>
+      <div
+        className={heroStyles.slideContent}
+        style={{
+          padding: previewDevice === 'mobile' ? '3.5rem 1.5rem 2.5rem 1.5rem' : 'clamp(2rem, 5vw, 4rem)',
+          margin: 0,
+          justifyContent: 'center',
+          maxWidth: previewDevice === 'mobile' ? '100%' : '56rem',
+          gap: previewDevice === 'mobile' ? '1.1rem' : '1.5rem'
+        }}
+      >
+        <div className={`${heroStyles.badge} ${heroStyles[form.badgeClass] || heroStyles.badgeCyan}`} style={{
+          alignSelf: 'flex-start',
+          fontSize: previewDevice === 'mobile' ? '0.62rem' : '0.65rem',
+          padding: previewDevice === 'mobile' ? '0.3rem 0.85rem' : '0.375rem 1rem'
+        }}>
           <span className={heroStyles.badgeDot}></span>
           {form.badge || 'Etiqueta'}
         </div>
-        <h2 className={heroStyles.title} style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+        <h2
+          className={heroStyles.title}
+          style={{
+            marginTop: previewDevice === 'mobile' ? '0.25rem' : '1rem',
+            marginBottom: previewDevice === 'mobile' ? '0.25rem' : '1rem',
+            fontSize: previewDevice === 'mobile' ? '2.2rem' : 'clamp(2.5rem, 5vw, 4.5rem)',
+            lineHeight: previewDevice === 'mobile' ? '1.05' : '0.95',
+            letterSpacing: previewDevice === 'mobile' ? '-0.02em' : '-0.025em',
+            wordBreak: previewDevice === 'mobile' ? 'break-word' : 'normal'
+          }}
+        >
           {form.titlePrimary} <br />
           {form.titleSecondary} <span className={heroStyles.titleHighlight}>{form.titleHighlight}</span>
         </h2>
-        <p className={heroStyles.description} style={{ maxWidth: '600px' }}>
+        <p
+          className={heroStyles.description}
+          style={{
+            maxWidth: previewDevice === 'mobile' ? '100%' : '600px',
+            fontSize: previewDevice === 'mobile' ? '0.925rem' : 'clamp(0.875rem, 2vw, 1.125rem)',
+            lineHeight: previewDevice === 'mobile' ? '1.5' : '1.625',
+            marginBottom: previewDevice === 'mobile' ? '0.25rem' : '0'
+          }}
+        >
           {form.description || 'Descripción corta de la promoción o servicio...'}
         </p>
 
         {(form.enableDetail1 || form.enableDetail2) && (
-          <div className={heroStyles.infoBox}>
+          <div
+            className={heroStyles.infoBox}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: previewDevice === 'mobile' ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: previewDevice === 'mobile' ? '0.75rem' : '1.5rem',
+              width: '100%',
+              marginTop: previewDevice === 'mobile' ? '0.25rem' : '0'
+            }}
+          >
             {form.enableDetail1 && (
-              <div className={heroStyles.infoItem}>
+              <div className={heroStyles.infoItem} style={{
+                padding: previewDevice === 'mobile' ? '0.25rem 0' : ''
+              }}>
                 {(() => {
                   const IconComp = AVAILABLE_ICONS.find(i => i.id === form.detailInfoAddressIcon)?.component || MapPin;
                   return <IconComp className={Number(form.order) === 4 ? heroStyles.infoIconIndigo : heroStyles.infoIconAccent} />;
@@ -431,7 +477,15 @@ export default function AdminHero({ baseUrl, token }) {
               </div>
             )}
             {form.enableDetail2 && (
-              <div className={`${heroStyles.infoItem} ${heroStyles.infoItemBorder}`}>
+              <div
+                className={`${heroStyles.infoItem} ${previewDevice === 'desktop' ? heroStyles.infoItemBorder : ''}`}
+                style={previewDevice === 'mobile' ? {
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                  paddingTop: '0.75rem',
+                  borderLeft: 'none',
+                  paddingLeft: 0
+                } : {}}
+              >
                 {(() => {
                   const IconComp = AVAILABLE_ICONS.find(i => i.id === form.detailInfoHoursIcon)?.component || Clock;
                   return <IconComp className={Number(form.order) === 4 ? heroStyles.infoIconIndigo : heroStyles.infoIconAccent} />;
@@ -445,12 +499,38 @@ export default function AdminHero({ baseUrl, token }) {
           </div>
         )}
 
-        <div className={heroStyles.actions}>
-          <button className={heroStyles.primaryButton}>
+        <div
+          className={heroStyles.actions}
+          style={{
+            display: 'flex',
+            flexDirection: previewDevice === 'mobile' ? 'column' : 'row',
+            alignItems: 'stretch',
+            gap: previewDevice === 'mobile' ? '0.75rem' : '1rem',
+            width: previewDevice === 'mobile' ? '100%' : 'auto',
+            marginTop: previewDevice === 'mobile' ? '0.5rem' : '1rem'
+          }}
+        >
+          <button
+            className={heroStyles.primaryButton}
+            style={{
+              width: previewDevice === 'mobile' ? '100%' : 'auto',
+              justifyContent: 'center',
+              padding: previewDevice === 'mobile' ? '0.85rem 1.5rem' : '',
+              fontSize: previewDevice === 'mobile' ? '0.85rem' : ''
+            }}
+          >
             {form.ctaText || 'VER PRODUCTOS'}
           </button>
           {form.whatsappBadge && (
-            <button className={heroStyles.secondaryButton}>
+            <button
+              className={heroStyles.secondaryButton}
+              style={{
+                width: previewDevice === 'mobile' ? '100%' : 'auto',
+                justifyContent: 'center',
+                padding: previewDevice === 'mobile' ? '0.85rem 1.5rem' : '',
+                fontSize: previewDevice === 'mobile' ? '0.85rem' : ''
+              }}
+            >
               <MessageCircle size={16} className={heroStyles.whatsappIcon} />
               PEDIDOS WHATSAPP
             </button>
@@ -504,7 +584,12 @@ export default function AdminHero({ baseUrl, token }) {
         {selectedId ? (
           <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
             <TransformWrapper
-              initialScale={window.innerWidth <= 480 ? 0.26 : window.innerWidth <= 600 ? 0.33 : window.innerWidth <= 768 ? 0.41 : window.innerWidth <= 900 ? 0.53 : window.innerWidth <= 1024 ? 0.62 : window.innerWidth <= 1200 ? 0.4 : window.innerWidth <= 1366 ? 0.5 : window.innerWidth <= 1600 ? 0.6 : 0.8}
+              key={previewDevice}
+              initialScale={
+                previewDevice === 'mobile'
+                  ? (window.innerWidth <= 768 ? 0.55 : window.innerWidth <= 1024 ? 0.7 : 0.82)
+                  : (window.innerWidth <= 480 ? 0.26 : window.innerWidth <= 600 ? 0.33 : window.innerWidth <= 768 ? 0.41 : window.innerWidth <= 900 ? 0.53 : window.innerWidth <= 1024 ? 0.62 : window.innerWidth <= 1200 ? 0.4 : window.innerWidth <= 1366 ? 0.5 : window.innerWidth <= 1600 ? 0.6 : 0.8)
+              }
               minScale={0.1}
               maxScale={3}
               centerOnInit={true}
@@ -513,13 +598,149 @@ export default function AdminHero({ baseUrl, token }) {
             >
               {({ zoomIn, zoomOut, resetTransform }) => (
                 <div style={{ width: '100%', height: '100%' }}>
-                  <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(0,0,0,0.5)', padding: '0.5rem', borderRadius: '0.5rem', backdropFilter: 'blur(4px)' }}>
-                    <button onClick={() => zoomIn()} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><ZoomIn size={18} /></button>
-                    <button onClick={() => zoomOut()} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><ZoomOut size={18} /></button>
-                    <button onClick={() => resetTransform()} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><Maximize size={18} /></button>
+                  {/* Selector de Dispositivo (PC / Teléfono) en Posición Superior Izquierda */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    left: '1rem',
+                    zIndex: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    background: 'rgba(15, 23, 42, 0.75)',
+                    padding: '0.35rem',
+                    borderRadius: '999px',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4)'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewDevice('desktop');
+                        setTimeout(() => resetTransform(), 50);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.45rem 1rem',
+                        borderRadius: '999px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        background: previewDevice === 'desktop'
+                          ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)'
+                          : 'transparent',
+                        color: previewDevice === 'desktop' ? '#ffffff' : 'rgba(255, 255, 255, 0.65)',
+                        boxShadow: previewDevice === 'desktop'
+                          ? '0 4px 12px rgba(6, 182, 212, 0.4)'
+                          : 'none'
+                      }}
+                      title="Vista en pantalla de PC"
+                    >
+                      <Monitor size={16} />
+                      <span>PC</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewDevice('mobile');
+                        setTimeout(() => resetTransform(), 50);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.45rem 1rem',
+                        borderRadius: '999px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        background: previewDevice === 'mobile'
+                          ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)'
+                          : 'transparent',
+                        color: previewDevice === 'mobile' ? '#ffffff' : 'rgba(255, 255, 255, 0.65)',
+                        boxShadow: previewDevice === 'mobile'
+                          ? '0 4px 12px rgba(6, 182, 212, 0.4)'
+                          : 'none'
+                      }}
+                      title="Vista en pantalla de Teléfono"
+                    >
+                      <Smartphone size={16} />
+                      <span>Teléfono</span>
+                    </button>
+                  </div>
+
+                  <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(15, 23, 42, 0.75)', padding: '0.5rem', borderRadius: '0.5rem', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                    <button type="button" onClick={() => zoomIn()} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }} title="Acercar"><ZoomIn size={18} /></button>
+                    <button type="button" onClick={() => zoomOut()} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }} title="Alejar"><ZoomOut size={18} /></button>
+                    <button type="button" onClick={() => resetTransform()} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }} title="Centrar / Restablecer"><Maximize size={18} /></button>
                   </div>
                   <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-                    <div style={{ width: '1400px', height: '800px', borderRadius: '1.5rem', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: '#000' }}>
+                    <div style={{
+                      width: previewDevice === 'mobile' ? '390px' : '1400px',
+                      height: previewDevice === 'mobile' ? '844px' : '800px',
+                      borderRadius: previewDevice === 'mobile' ? '3rem' : '1.5rem',
+                      overflow: 'hidden',
+                      boxShadow: previewDevice === 'mobile'
+                        ? '0 0 0 10px #0f172a, 0 0 0 12px rgba(255, 255, 255, 0.2), 0 25px 50px -12px rgba(0, 0, 0, 0.9)'
+                        : '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+                      border: previewDevice === 'mobile' ? '2px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(255, 255, 255, 0.15)',
+                      backgroundColor: '#000',
+                      transition: 'width 0.45s cubic-bezier(0.16, 1, 0.3, 1), height 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.45s ease, box-shadow 0.45s ease',
+                      position: 'relative'
+                    }}>
+                      {/* Notch / Dynamic Island en Modo Teléfono */}
+                      {previewDevice === 'mobile' && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '11px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '110px',
+                          height: '24px',
+                          backgroundColor: '#000000',
+                          borderRadius: '20px',
+                          zIndex: 50,
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'flex-end',
+                          paddingRight: '8px',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.8)'
+                        }}>
+                          <div style={{
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '50%',
+                            backgroundColor: '#0f172a',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            boxShadow: 'inset 0 0 4px rgba(59, 130, 246, 0.5)'
+                          }}></div>
+                        </div>
+                      )}
+
+                      {/* Barra inferior de inicio en Modo Teléfono */}
+                      {previewDevice === 'mobile' && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '8px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '130px',
+                          height: '5px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                          borderRadius: '10px',
+                          zIndex: 50
+                        }}></div>
+                      )}
+
                       {renderPreview()}
                     </div>
                   </TransformComponent>
