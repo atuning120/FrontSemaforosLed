@@ -68,6 +68,14 @@ export default function ProductCarousel({
     return () => cancelAnimationFrame(animationId);
   }, [isInteractionActive, isPaused, products?.length]);
 
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      dragState.current.isDragging = false;
+    };
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+  }, []);
+
   if (!products || products.length === 0) return null;
 
   const duplicatedProducts = [...products, ...products, ...products, ...products];
@@ -136,14 +144,6 @@ export default function ProductCarousel({
       el.scrollLeft = newScroll;
     }
   };
-
-  useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      dragState.current.isDragging = false;
-    };
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
-  }, []);
 
   const handleMouseLeave = () => {
     dragState.current.isDragging = false;
