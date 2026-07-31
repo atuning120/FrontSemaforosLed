@@ -137,9 +137,21 @@ export default function ProductCarousel({
     }
   };
 
-  const handleMouseUpOrLeave = () => {
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      dragState.current.isDragging = false;
+    };
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+  }, []);
+
+  const handleMouseLeave = () => {
     dragState.current.isDragging = false;
     setIsInteractionActive(false);
+  };
+
+  const handleMouseUp = () => {
+    dragState.current.isDragging = false;
   };
 
   const handleClickCapture = (e) => {
@@ -171,9 +183,9 @@ export default function ProductCarousel({
               className={`${styles.carouselList} ${styles.infiniteScrollList}`}
               ref={carouselRef}
               onMouseEnter={() => setIsInteractionActive(true)}
-              onMouseLeave={handleMouseUpOrLeave}
+              onMouseLeave={handleMouseLeave}
               onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUpOrLeave}
+              onMouseUp={handleMouseUp}
               onMouseMove={handleMouseMove}
               onClickCapture={handleClickCapture}
               onTouchStart={handleTouchStart}
