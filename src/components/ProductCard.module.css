@@ -97,55 +97,6 @@
 		z-index: 1;
 	}
 
-	.indicators {
-		position: absolute;
-		bottom: 0.65rem;
-		left: 50%;
-		transform: translate(-50%, 8px);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-wrap: wrap;
-		max-width: 85%;
-		gap: 0.35rem;
-		padding: 0.25rem 0.55rem;
-		border-radius: 999px;
-		background: rgba(2, 6, 23, 0.65);
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		z-index: 10;
-		opacity: 0;
-		transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-		pointer-events: none;
-	}
-
-	.indicatorsVisible {
-		opacity: 1;
-		transform: translate(-50%, 0);
-		pointer-events: auto;
-	}
-
-	.indicator {
-		width: 6px;
-		height: 4px;
-		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.35);
-		transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.35s ease, transform 0.2s ease;
-		cursor: pointer;
-
-		&:hover {
-			background: rgba(255, 255, 255, 0.85);
-			transform: scaleY(1.25);
-		}
-	}
-
-	.indicatorActive {
-		width: 18px;
-		background: #fff;
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-	}
-
 	.noImage {
 		width: 100%;
 		height: 100%;
