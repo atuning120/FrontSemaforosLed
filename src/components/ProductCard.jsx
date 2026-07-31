@@ -105,30 +105,6 @@ const ProductCard = forwardRef(({
           <div className={styles.noImage}>No hay imagen</div>
         )}
 
-        {images.length > 1 && (
-          <div
-            className={`${styles.indicators} ${
-              isHovered ? styles.indicatorsVisible : ''
-            }`}
-          >
-            {images.map((_, idx) => (
-              <span
-                key={idx}
-                className={`${styles.indicator} ${
-                  idx === currentImageIndex ? styles.indicatorActive : ''
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentImageIndex(idx);
-                }}
-                role="button"
-                tabIndex={0}
-                aria-label={`Ver imagen ${idx + 1}`}
-              />
-            ))}
-          </div>
-        )}
-
         {isFeatured && (
           <div className={styles.badges}>
             <span className={styles.badgeFeatured}>Destacado</span>
