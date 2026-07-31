@@ -1,4 +1,4 @@
-import { forwardRef, useState, useEffect, useMemo } from 'react';
+import { forwardRef, useState, useEffect, useMemo, useRef } from 'react';
 import { MessageCircle } from 'lucide-react';
 import styles from './ProductCard.module.css';
 
@@ -12,11 +12,53 @@ const ProductCard = forwardRef(({
   onMouseLeave,
   onFocus,
   onBlur,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
+  onTouchCancel,
+  onContextMenu,
   ...props
 }, ref) => {
   const isFeatured = type === 'featured' || product.featured;
   const [isHovered, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const instanceIdRef = useRef(Math.random().toString(36).substring(2, 9));
+  const cardRef = useRef(null);
+  const setRef = (el) => {
+    cardRef.current = el;
+    if (typeof ref === 'function') {
+      ref(el);
+    } else if (ref) {
+      ref.current = el;
+    }
+  };
+
+  const activateCard = () => {
+    setIsHovered((prev) => {
+      if (!prev) {
+        window.dispatchEvent(
+          new CustomEvent('product-card-activate', {
+            detail: instanceIdRef.current,
+          })
+        );
+      }
+      return true;
+    });
+  };
+
+  useEffect(() => {
+    const handleOtherCardActivated = (e) => {
+      if (e.detail !== instanceIdRef.current) {
+        setIsHovered(false);
+      }
+    };
+
+    window.addEventListener('product-card-activate', handleOtherCardActivated);
+    return () => {
+      window.removeEventListener('product-card-activate', handleOtherCardActivated);
+    };
+  }, []);
 
   const images = useMemo(() => {
     const list =
@@ -45,6 +87,51 @@ const ProductCard = forwardRef(({
     return () => clearInterval(timer);
   }, [isHovered, images.length]);
 
+  useEffect(() => {
+    if (images.length <= 1) return;
+
+    const handleGlobalTouchMove = (e) => {
+      if (!e.touches || !e.touches[0] || !cardRef.current) return;
+      const touch = e.touches[0];
+      const rect = cardRef.current.getBoundingClientRect();
+      const isOver =
+        touch.clientX >= rect.left &&
+        touch.clientX <= rect.right &&
+        touch.clientY >= rect.top &&
+        touch.clientY <= rect.bottom;
+
+      if (isOver) {
+        activateCard();
+      } else {
+        setIsHovered(false);
+      }
+    };
+
+    const handleGlobalTouchStart = (e) => {
+      if (!cardRef.current) return;
+      if (!cardRef.current.contains(e.target)) {
+        setIsHovered(false);
+      }
+    };
+
+    window.addEventListener('touchmove', handleGlobalTouchMove, {
+      passive: true,
+    });
+    window.addEventListener('touchstart', handleGlobalTouchStart, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener('touchmove', handleGlobalTouchMove);
+      window.removeEventListener('touchstart', handleGlobalTouchStart);
+    };
+  }, [images.length]);
+
+  const handleTouchStart = (e) => {
+    activateCard();
+    onTouchStart?.(e);
+  };
+
   let mediaClass = styles.media;
   if (product.tamano_imagen === 'square') mediaClass += ` ${styles.mediaSquare}`;
   else if (product.tamano_imagen === 'landscape') mediaClass += ` ${styles.mediaLandscape}`;
@@ -52,7 +139,7 @@ const ProductCard = forwardRef(({
 
   return (
     <div
-      ref={ref}
+      ref={setRef}
       className={`${styles.product} ${isCarousel ? styles.carouselProduct : ''} ${
         isHovered ? styles.productHovered : ''
       }`}
@@ -65,7 +152,7 @@ const ProductCard = forwardRef(({
         }
       }}
       onMouseEnter={(e) => {
-        setIsHovered(true);
+        activateCard();
         onMouseEnter?.(e);
       }}
       onMouseLeave={(e) => {
@@ -73,13 +160,14 @@ const ProductCard = forwardRef(({
         onMouseLeave?.(e);
       }}
       onFocus={(e) => {
-        setIsHovered(true);
+        activateCard();
         onFocus?.(e);
       }}
       onBlur={(e) => {
         setIsHovered(false);
         onBlur?.(e);
       }}
+      onTouchStart={handleTouchStart}
       {...props}
     >
       <div className={mediaClass}>

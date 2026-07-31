@@ -15,8 +15,15 @@
 	-webkit-backface-visibility: hidden;
 	backface-visibility: hidden;
 	will-change: transform;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
 
-	&:hover {
+	&:hover,
+	&:focus,
+	&:focus-within,
+	&.productHovered {
 		border-color: rgba(59, 130, 246, 0.3);
 		transform: translate3d(0, -2px, 0);
 		box-shadow: 0 22px 40px rgba(2, 6, 23, 0.6);
